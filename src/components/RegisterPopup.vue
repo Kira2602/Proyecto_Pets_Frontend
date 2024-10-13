@@ -1,14 +1,20 @@
 <template>
-  <div v-if="isVisible" class="login-popup-overlay" @click.self="closePopup">
-    <div class="login-popup">
+  <div v-if="isVisible" class="register-popup-overlay" @click.self="closePopup">
+    <div class="register-popup">
       <button class="close-btn" @click="closePopup">×</button>
-      <div class="login-content">
-        <div class="login-image">
-          <img src="@/components/images/login_image.jpeg" alt="Login Image" />
+      <div class="register-content">
+        <div class="register-image">
+          <img src="@/components/images/registro_image.jpeg" alt="Register Image" />
         </div>
-        <div class="login-form">
-          <h2>Iniciar Sesión</h2>
+        <div class="register-form">
+          <h2>Registrarse</h2>
           <form>
+            <label for="name">Nombre</label>
+            <input type="text" id="name" placeholder="Nombre" />
+
+            <label for="phone">Teléfono</label>
+            <input type="text" id="phone" placeholder="Teléfono" />
+
             <label for="email">Email</label>
             <input type="email" id="email" placeholder="Email" />
 
@@ -24,13 +30,8 @@
               </span>
             </div>
 
-            <a href="#" class="forgot-password">Olvidé mi contraseña.</a>
-
-            <button type="submit" class="btn-login">Ingresar</button>
+            <button type="submit" class="btn-register">Registrarse</button>
           </form>
-
-          <p class="no-account-text">¿Aún no tienes una cuenta?</p>
-          <button class="btn-register" @click="$emit('switchToRegister')">Registrarse</button>
         </div>
       </div>
     </div>
@@ -39,7 +40,7 @@
 
 <script>
 export default {
-  name: 'LoginPopup',
+  name: 'RegisterPopup',
   data() {
     return {
       showPassword: false
@@ -69,7 +70,7 @@ export default {
   font-family: 'Poppins', sans-serif;
 }
 
-.login-popup-overlay {
+.register-popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -82,7 +83,7 @@ export default {
   z-index: 9999;
 }
 
-.login-popup {
+.register-popup {
   background-color: white;
   padding: 0px;
   border-radius: 30px;
@@ -104,40 +105,40 @@ export default {
   cursor: pointer;
 }
 
-.login-content {
+.register-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.login-image img {
+.register-image img {
   width: 360px;
   margin: 5px 10px;
   height: auto;
   border-radius: 30px;
 }
 
-.login-form {
+.register-form {
   flex: 1;
   padding-left: 30px;
 }
 
-.login-form h2 {
+.register-form h2 {
   color: #af8a8a;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   text-align: center;
-  font-size: 2.4rem;
-  margin-top: 10px;
+  font-size: 2.2rem;
 }
 
-.login-form label {
+.register-form label {
   display: block;
   font-size: 16px;
   color: #333;
   margin-bottom: 2px;
+  font-weight: bold;
 }
 
-.login-form input {
+.register-form input {
   width: 80%;
   padding: 12px;
   margin-bottom: 15px;
@@ -165,55 +166,22 @@ export default {
   color: #af8a8a;
 }
 
-.forgot-password {
-  font-size: 14px;
-  color: #af8a8a;
-  margin-bottom: 20px;
-  display: block;
-  text-align: left;
-}
-
-.btn-login {
-  background-color: #ffe5d9;
-  color: #9d9189;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 25px; /* Bordes más redondeados */
-  cursor: pointer;
-  font-weight: bold;
-  margin-left: 15px;
-  width: 80%;
-  margin-bottom: 10px;
-  font-size: 1.2rem;
-  box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-.btn-login:hover {
-  background-color: #e3a5a0;
-}
-
 .btn-register {
   background-color: #d8e2dc;
-  color: #9d9189;
-  padding: 10px 20px;
-  margin-left: 15px;
+  color: #9d8189;
+  padding: 10px 10px;
   border: none;
   border-radius: 25px;
   cursor: pointer;
   width: 80%;
   margin-top: 10px;
-  font-weight: bold;
   font-size: 1.2rem;
+  margin-left: 15px;
+  font-weight: bold;
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .btn-register:hover {
   background-color: #c2ccc4;
-}
-
-.no-account-text {
-  font-size: 14px;
-  color: #9d9189;
-  margin-top: 20px;
 }
 </style>

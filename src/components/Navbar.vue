@@ -11,35 +11,61 @@
       </ul>
       <div class="buttons">
         <button class="btn btn-outline" @click="showLoginPopup">Iniciar Sesión</button>
-        <button class="btn btn-filled">Registrarse</button>
+        <button class="btn btn-filled" @click="showRegisterPopup">Registrarse</button>
       </div>
     </div>
 
-    <LoginPopup :isVisible="showPopup" @close="closeLoginPopup" />
+    <!-- LoginPopup -->
+    <LoginPopup
+      :isVisible="showLoginPopupVisible"
+      @close="closeLoginPopup"
+      @switchToRegister="switchToRegister"
+    />
+
+    <!-- RegisterPopup -->
+    <RegisterPopup :isVisible="showRegisterPopupVisible" @close="closeRegisterPopup" />
   </nav>
 </template>
 
 <script>
 import LoginPopup from '@/components/LoginPopup.vue'
+import RegisterPopup from '@/components/RegisterPopup.vue'
 
 export default {
   name: 'Navbar',
   components: {
-    LoginPopup
+    LoginPopup,
+    RegisterPopup
   },
   data() {
     return {
-      showPopup: false
+      showLoginPopupVisible: false, // Controla el popup de login
+      showRegisterPopupVisible: false // Controla el popup de registro
     }
   },
   methods: {
+    // Mostrar el popup de login
     showLoginPopup() {
-      this.showPopup = true
-      console.log('Popup Visible:', this.showPopup) // Verifica el valor
+      this.showLoginPopupVisible = true
+      this.showRegisterPopupVisible = false
     },
-
+    // Cerrar el popup de login
     closeLoginPopup() {
-      this.showPopup = false
+      this.showLoginPopupVisible = false
+    },
+    // Mostrar el popup de registro
+    showRegisterPopup() {
+      this.showRegisterPopupVisible = true
+      this.showLoginPopupVisible = false
+    },
+    // Cerrar el popup de registro
+    closeRegisterPopup() {
+      this.showRegisterPopupVisible = false
+    },
+    // Cambiar de login a registro
+    switchToRegister() {
+      this.showLoginPopupVisible = false
+      this.showRegisterPopupVisible = true
     }
   }
 }
