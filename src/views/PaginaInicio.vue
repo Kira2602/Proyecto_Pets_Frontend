@@ -19,14 +19,20 @@
     <!-- Segunda sección (Nuestras funcionalidades principales) -->
     <section>
       <h2>Nuestras funcionalidades principales</h2>
-      <ul class="shop-pets">
+      <ul class="shop-pets" id="funcionalidades">
         <li class="card-large card-light" id="sup-dog">
           <div class="card-image">
             <img src="@/components/images/gestion_citas_medicas_icon.png" />
           </div>
           <ul>
             Gestión de citas médicas y recordatorios
-            <li><a href="#">Food &amp; Treats</a></li>
+            <li>
+              <a href="#"
+                >Organiza y gestiona las citas médicas y los calendarios de vacunación de tus
+                mascotas. Recibe recordatorios automáticos para que nunca olvides una revisión
+                médica o una fecha importante de vacunación.</a
+              >
+            </li>
             <button class="btn btn-outline">Ir</button>
           </ul>
         </li>
@@ -37,7 +43,13 @@
           </div>
           <ul>
             Planificación de actividades diarias
-            <li><a href="#">Food &amp; Treats</a></li>
+            <li>
+              <a href="#"
+                >Planifica las actividades diarias de tu mascota, como paseos, tiempo de juego y
+                horarios de alimentación. Este módulo te ayuda a mantener una rutina equilibrada
+                para que tu mascota reciba el cuidado y la atención que necesita durante el día.</a
+              >
+            </li>
             <button class="btn btn-outline">Ir</button>
           </ul>
         </li>
@@ -48,7 +60,13 @@
           </div>
           <ul>
             Historial de actividades diarias
-            <li><a href="#">Food &amp; Treats</a></li>
+            <li>
+              <a href="#"
+                >Lleva un registro completo de las actividades pasadas de tu mascota, incluyendo
+                paseos, citas médicas y vacunaciones. Este módulo te permite consultar un historial
+                detallado de todos los eventos relacionados con el cuidado de tu mascota.</a
+              >
+            </li>
             <button class="btn btn-outline">Ir</button>
           </ul>
         </li>
@@ -58,7 +76,14 @@
           </div>
           <ul>
             Notificaciones automáticas
-            <li><a href="#">Food</a></li>
+            <li>
+              <a href="#"
+                >Recibe alertas y recordatorios automáticos sobre las próximas actividades, citas y
+                tareas importantes de cuidado. Este módulo te ayuda a estar al tanto de las
+                necesidades de tu mascota mediante notificaciones puntuales para todo, desde paseos
+                diarios hasta revisiones médicas.</a
+              >
+            </li>
             <button class="btn btn-outline">Ir</button>
           </ul>
         </li>
@@ -66,7 +91,7 @@
     </section>
 
     <!-- Sección de Redes Sociales -->
-    <section class="social-media">
+    <section class="social-media" id="redes">
       <h2>Visita nuestras redes sociales</h2>
       <div class="social-icons">
         <a href="#"><img src="@/components/images/facebook_icon.png" alt="Facebook" /></a>

@@ -3,11 +3,20 @@
     <div class="logo">
       <img src="@/components/images/nav_bar_logo.png" alt="Logo" class="logo-img" />
     </div>
-    <div class="menu-buttons">
+
+    <!-- Botón hamburguesa para móviles -->
+    <div class="hamburger-menu" @click="toggleMobileMenu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+
+    <!-- Menú de navegación normal, pero con la clase para móviles -->
+    <div :class="['menu-buttons', mobileMenuVisible ? 'menu-mobile-visible' : '']">
       <ul class="menu">
-        <a href="#" class="menu-link">Inicio</a>
-        <a href="#" class="menu-link">Funcionalidades</a>
-        <a href="#" class="menu-link">Redes Sociales</a>
+        <a href="#encabezado" class="menu-link" @click="closeMobileMenu">Inicio</a>
+        <a href="#funcionalidades" class="menu-link" @click="closeMobileMenu">Funcionalidades</a>
+        <a href="#redes" class="menu-link" @click="closeMobileMenu">Redes Sociales</a>
       </ul>
       <div class="buttons">
         <button class="btn btn-outline" @click="showLoginPopup">Iniciar Sesión</button>
@@ -40,7 +49,8 @@ export default {
   data() {
     return {
       showLoginPopupVisible: false, // Controla el popup de login
-      showRegisterPopupVisible: false // Controla el popup de registro
+      showRegisterPopupVisible: false, // Controla el popup de registro
+      mobileMenuVisible: false // Controla la visibilidad del menú móvil
     }
   },
   methods: {
@@ -66,12 +76,26 @@ export default {
     switchToRegister() {
       this.showLoginPopupVisible = false
       this.showRegisterPopupVisible = true
+    },
+    // Alternar el menú móvil
+    toggleMobileMenu() {
+      this.mobileMenuVisible = !this.mobileMenuVisible
+    },
+    // Cerrar el menú móvil al hacer clic en un enlace
+    closeMobileMenu() {
+      this.mobileMenuVisible = false
     }
   }
 }
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -81,6 +105,7 @@ export default {
   border-radius: 50px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   margin: 20px;
+  position: relative;
 }
 
 .logo-img {
@@ -111,7 +136,6 @@ export default {
   color: #db7f67;
 }
 
-/* Estilo de los botones */
 .buttons {
   display: flex;
   gap: 10px;
@@ -148,5 +172,68 @@ export default {
 .btn-filled:hover {
   background-color: #f4cfc6;
   color: #db7f67;
+}
+
+/* Estilos del menú hamburguesa */
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.hamburger-menu .bar {
+  height: 3px;
+  width: 100%;
+  background-color: #333;
+  border-radius: 10px;
+}
+
+.menu-mobile-visible {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Media Queries para móviles */
+@media screen and (max-width: 768px) {
+  /* Ocultar el menú normal en pantallas pequeñas */
+  .menu-buttons {
+    display: none;
+  }
+
+  .hamburger-menu {
+    display: flex;
+  }
+
+  .menu-mobile-visible {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    z-index: 10;
+  }
+
+  .menu-mobile-visible .menu {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .menu-mobile-visible .buttons {
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .menu-mobile-visible .btn {
+    width: 100%;
+  }
 }
 </style>

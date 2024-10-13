@@ -84,11 +84,10 @@ export default {
 
 .login-popup {
   background-color: white;
-  padding: 0px;
   border-radius: 30px;
-  width: 800px;
+  width: 800px; /* Ajuste para pantallas más grandes */
   height: 520px;
-  padding: 10px;
+  padding: 20px;
   max-width: 90%;
   position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -110,9 +109,16 @@ export default {
   align-items: center;
 }
 
+.login-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .login-image img {
-  width: 360px;
-  margin: 5px 10px;
+  width: 100%; /* Asegura que la imagen ocupe su contenedor */
+  max-width: 360px;
   height: auto;
   border-radius: 30px;
 }
@@ -124,10 +130,9 @@ export default {
 
 .login-form h2 {
   color: #af8a8a;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   text-align: center;
   font-size: 2.4rem;
-  margin-top: 10px;
 }
 
 .login-form label {
@@ -159,7 +164,7 @@ export default {
   position: absolute;
   top: 50%;
   right: 65px;
-  transform: translateY(-70%);
+  transform: translateY(-50%);
   cursor: pointer;
   font-size: 1.2rem;
   color: #af8a8a;
@@ -178,10 +183,9 @@ export default {
   color: #9d9189;
   padding: 10px 20px;
   border: none;
-  border-radius: 25px; /* Bordes más redondeados */
+  border-radius: 25px;
   cursor: pointer;
   font-weight: bold;
-  margin-left: 15px;
   width: 80%;
   margin-bottom: 10px;
   font-size: 1.2rem;
@@ -196,7 +200,6 @@ export default {
   background-color: #d8e2dc;
   color: #9d9189;
   padding: 10px 20px;
-  margin-left: 15px;
   border: none;
   border-radius: 25px;
   cursor: pointer;
@@ -215,5 +218,66 @@ export default {
   font-size: 14px;
   color: #9d9189;
   margin-top: 20px;
+}
+
+/* Ajustes responsivos */
+@media screen and (max-width: 768px) {
+  .login-popup {
+    width: 90%;
+    height: auto;
+    border-radius: 15px;
+  }
+
+  .login-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .login-image img {
+    width: 50%;
+    margin: 10px 0;
+  }
+
+  .login-form {
+    padding-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .login-form h2 {
+    font-size: 2rem;
+  }
+
+  .login-form input {
+    width: 90%;
+  }
+
+  .password-wrapper input {
+    width: 85%;
+  }
+
+  .toggle-password {
+    right: 20px;
+  }
+
+  .btn-login,
+  .btn-register {
+    width: 90%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .login-image img {
+    width: 45%;
+  }
+
+  .login-form h2 {
+    font-size: 1.8rem;
+  }
+
+  .btn-login,
+  .btn-register {
+    font-size: 1rem;
+  }
 }
 </style>
