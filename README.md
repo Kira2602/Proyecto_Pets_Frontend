@@ -33,3 +33,8 @@ npm run build
 ```sh
 npm run lint
 ```
+
+### Instalacion para iconos FontAwesome
+```sh
+npm install @fortawesome/fontawesome-free
+```
