@@ -10,16 +10,38 @@
         <a href="#" class="menu-link">Redes Sociales</a>
       </ul>
       <div class="buttons">
-        <button class="btn btn-outline">Iniciar Sesión</button>
+        <button class="btn btn-outline" @click="showLoginPopup">Iniciar Sesión</button>
         <button class="btn btn-filled">Registrarse</button>
       </div>
     </div>
+
+    <LoginPopup :isVisible="showPopup" @close="closeLoginPopup" />
   </nav>
 </template>
 
 <script>
+import LoginPopup from '@/components/LoginPopup.vue'
+
 export default {
-  name: 'Navbar'
+  name: 'Navbar',
+  components: {
+    LoginPopup
+  },
+  data() {
+    return {
+      showPopup: false
+    }
+  },
+  methods: {
+    showLoginPopup() {
+      this.showPopup = true
+      console.log('Popup Visible:', this.showPopup) // Verifica el valor
+    },
+
+    closeLoginPopup() {
+      this.showPopup = false
+    }
+  }
 }
 </script>
 
