@@ -1,27 +1,42 @@
 <template>
   <nav class="navbar">
+    <!-- Logo -->
     <div class="logo">
       <img src="@/components/images/nav_bar_logo.png" alt="Logo" class="logo-img" />
     </div>
 
-    <!-- Botón hamburguesa para móviles -->
-    <div class="hamburger-menu" @click="toggleMobileMenu">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </div>
-
-    <!-- Menú de navegación normal, pero con la clase para móviles -->
-    <div :class="['menu-buttons', mobileMenuVisible ? 'menu-mobile-visible' : '']">
+    <!-- Menú normal para pantallas grandes -->
+    <div class="menu-desktop">
       <ul class="menu">
-        <a href="#encabezado" class="menu-link" @click="closeMobileMenu">Inicio</a>
-        <a href="#funcionalidades" class="menu-link" @click="closeMobileMenu">Funcionalidades</a>
-        <a href="#redes" class="menu-link" @click="closeMobileMenu">Redes Sociales</a>
+        <li><a href="#encabezado" class="menu-link">Inicio</a></li>
+        <li><a href="#funcionalidades" class="menu-link">Funcionalidades</a></li>
+        <li><a href="#redes" class="menu-link">Redes Sociales</a></li>
       </ul>
       <div class="buttons">
         <button class="btn btn-outline" @click="showLoginPopup">Iniciar Sesión</button>
         <button class="btn btn-filled" @click="showRegisterPopup">Registrarse</button>
       </div>
+    </div>
+
+    <!-- Menú hamburguesa para móviles/tablets -->
+    <div class="menuToggle">
+      <input type="checkbox" />
+      <span></span>
+      <span></span>
+      <span></span>
+      <ul class="menuItem">
+        <li><a href="#encabezado" class="menu-link" @click="closeMobileMenu">Inicio</a></li>
+        <li>
+          <a href="#funcionalidades" class="menu-link" @click="closeMobileMenu">Funcionalidades</a>
+        </li>
+        <li><a href="#redes" class="menu-link" @click="closeMobileMenu">Redes Sociales</a></li>
+        <li>
+          <button class="btn btn-outline" @click="showLoginPopup">Iniciar Sesión</button>
+        </li>
+        <li>
+          <button class="btn btn-filled" @click="showRegisterPopup">Registrarse</button>
+        </li>
+      </ul>
     </div>
 
     <!-- LoginPopup -->
@@ -48,9 +63,8 @@ export default {
   },
   data() {
     return {
-      showLoginPopupVisible: false, // Controla el popup de login
-      showRegisterPopupVisible: false, // Controla el popup de registro
-      mobileMenuVisible: false // Controla la visibilidad del menú móvil
+      showLoginPopupVisible: false,
+      showRegisterPopupVisible: false
     }
   },
   methods: {
@@ -68,22 +82,10 @@ export default {
       this.showRegisterPopupVisible = true
       this.showLoginPopupVisible = false
     },
-    // Cerrar el popup de registro
-    closeRegisterPopup() {
-      this.showRegisterPopupVisible = false
-    },
     // Cambiar de login a registro
     switchToRegister() {
       this.showLoginPopupVisible = false
       this.showRegisterPopupVisible = true
-    },
-    // Alternar el menú móvil
-    toggleMobileMenu() {
-      this.mobileMenuVisible = !this.mobileMenuVisible
-    },
-    // Cerrar el menú móvil al hacer clic en un enlace
-    closeMobileMenu() {
-      this.mobileMenuVisible = false
     }
   }
 }
@@ -103,7 +105,7 @@ export default {
   padding: 10px 20px;
   background-color: #fff;
   border-radius: 50px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
   margin: 20px;
   position: relative;
 }
@@ -113,27 +115,29 @@ export default {
   height: 50px;
 }
 
-.menu-buttons {
+/* Menú para pantallas grandes (PC) */
+.menu-desktop {
   display: flex;
   align-items: center;
 }
 
-.menu {
+.menu-desktop .menu {
   display: flex;
   gap: 20px;
   margin-right: 40px;
 }
 
-.menu-link {
+.menu-desktop .menu-link {
   text-decoration: none;
+  list-style: none;
   font-size: 16px;
   color: #45413e;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
-.menu-link:hover {
-  color: #db7f67;
+li {
+  list-style: none;
 }
 
 .buttons {
@@ -174,66 +178,98 @@ export default {
   color: #db7f67;
 }
 
-/* Estilos del menú hamburguesa */
-.hamburger-menu {
+/* Estilos del menú hamburguesa para móviles/tablets */
+.menuToggle {
+  display: none;
+  position: relative;
+  z-index: 1;
+  user-select: none;
+}
+
+.menuToggle input {
+  display: block;
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  top: -7px;
+  left: 0;
+  cursor: pointer;
+  opacity: 0;
+  z-index: 2;
+}
+
+.menuToggle span {
+  display: block;
+  width: 30px;
+  height: 4px;
+  margin-bottom: 5px;
+  margin-right: 20px;
+  background-color: #333;
+  border-radius: 3px;
+  transition: all 0.8s ease;
+}
+
+.menuToggle input:checked ~ span {
+  transform: rotate(45deg);
+  background-color: #db7f67;
+  top: 0;
+}
+
+.menuToggle input:checked ~ span:nth-last-child(2) {
+  opacity: 0;
+}
+
+.menuToggle input:checked ~ span:nth-last-child(3) {
+  transform: rotate(-45deg);
+  background-color: #db7f67;
+  top: -20px;
+}
+
+.menuItem {
+  position: absolute;
+  width: 320px;
+  height: 60vh;
+  top: 100%;
+  right: -10px;
+  background-color: #fff;
+  list-style: none;
+  padding-top: 20px;
+  padding-left: 0px;
+  text-align: center;
   display: none;
   flex-direction: column;
-  justify-content: space-between;
-  width: 30px;
-  height: 20px;
-  cursor: pointer;
+  z-index: 10;
+  border-radius: 25px;
 }
 
-.hamburger-menu .bar {
-  height: 3px;
-  width: 100%;
-  background-color: #333;
-  border-radius: 10px;
-}
-
-.menu-mobile-visible {
+.menuToggle input:checked ~ .menuItem {
   display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-/* Media Queries para móviles */
+.menuItem li {
+  margin: 15px 0;
+}
+
+.menu-link {
+  text-decoration: none;
+  font-size: 18px;
+  color: #45413e;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.menu-link:hover {
+  color: #db7f67;
+}
+
+/* Media query para aplicar el menú hamburguesa solo en móviles/tablets */
 @media screen and (max-width: 768px) {
-  /* Ocultar el menú normal en pantallas pequeñas */
-  .menu-buttons {
+  .menu-desktop {
     display: none;
   }
 
-  .hamburger-menu {
-    display: flex;
-  }
-
-  .menu-mobile-visible {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: 80px;
-    left: 0;
-    width: 100%;
-    background-color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    z-index: 10;
-  }
-
-  .menu-mobile-visible .menu {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .menu-mobile-visible .buttons {
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 15px;
-  }
-
-  .menu-mobile-visible .btn {
-    width: 100%;
+  .menuToggle {
+    display: block;
   }
 }
 </style>

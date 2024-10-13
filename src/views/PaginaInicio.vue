@@ -206,8 +206,9 @@ body {
   align-items: center;
   background-color: #ffcad4;
   padding: 40px;
-  margin: 20px 0;
+  margin: 10px 0;
   position: relative;
+  min-height: 30vh;
 }
 
 .hero-content {
@@ -262,7 +263,7 @@ body {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 20px;
+    padding: 20px 0px;
   }
 
   .hero-content {
@@ -280,7 +281,9 @@ body {
 
   .hero-image {
     position: static;
-    width: 250px;
+    width: 100%;
+    padding: 0px;
+    overflow: hidden;
   }
 }
 
@@ -299,7 +302,7 @@ body {
 }
 
 .social-icons {
-  display: flex;
+  display: flex table-column;
   justify-content: center;
   gap: 100px;
 }
@@ -510,7 +513,6 @@ footer {
   display: flex;
 }
 
-/* Estilos de los botones "Ir" de las cards*/
 .btn {
   padding: 10px 0px;
   border-radius: 30px;
@@ -531,39 +533,6 @@ footer {
 .btn-outline:hover {
   background-color: #f4acb7;
   color: white;
-}
-
-@media only screen and (min-width: 1200px) {
-  :root {
-    --pg-margin: 48px;
-  }
-
-  section.hero h1 {
-    --hero-text: 48px;
-  }
-
-  section.hero {
-    aspect-ratio: 2/1;
-  }
-
-  .btn-group {
-    flex-direction: row;
-  }
-
-  .shop-pets {
-    display: flex;
-    flex-direction: row;
-    grid-gap: 24px;
-    margin-bottom: 40px;
-    margin-left: 20px;
-    margin-right: 20px;
-    justify-content: space-between;
-  }
-
-  footer {
-    flex-direction: row;
-    text-align: left;
-  }
 }
 
 @media only screen and (min-width: 1200px) {
@@ -594,6 +563,63 @@ footer {
   footer {
     flex-direction: row;
     text-align: left;
+  }
+}
+
+/* Ajustes para tablets y celulares */
+@media only screen and (max-width: 1024px) {
+  /* Para tablets */
+  .shop-pets {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 16px;
+    padding: 20px;
+  }
+
+  .card-large {
+    width: 80%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .card-large img {
+    width: 60%;
+    height: auto;
+  }
+
+  .card-large ul {
+    font-size: 1rem;
+    padding: 20px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  /* Para celulares */
+  .shop-pets {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 16px;
+    padding: 15px;
+  }
+
+  .card-large {
+    width: 95%;
+    max-width: 350px;
+    margin: 0 auto;
+  }
+
+  .card-large img {
+    width: 50%;
+    height: auto;
+  }
+
+  .card-large ul {
+    font-size: 0.9rem;
+    padding: 15px;
   }
 }
 </style>
