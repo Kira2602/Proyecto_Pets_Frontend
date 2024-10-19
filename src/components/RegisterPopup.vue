@@ -166,7 +166,7 @@ export default {
   position: absolute;
   top: 50%;
   right: 65px;
-  transform: translateY(-50%);
+  transform: translateY(-70%);
   cursor: pointer;
   font-size: 1.2rem;
   color: #af8a8a;

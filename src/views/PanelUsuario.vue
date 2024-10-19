@@ -8,7 +8,7 @@
     <section class="panel-usuario">
       <h2>PANEL DE USUARIO</h2>
       <div class="icon-grid">
-        <div class="icon-card">
+        <div class="icon-card" @click="openProfilePopup">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/perfil_usuario.png" alt="Perfil de usuario" />
@@ -104,16 +104,31 @@
         <p>© 2024 Grupo PetCare. Todos los derechos reservados.</p>
       </div>
     </footer>
+
+    <!-- Popup de edición de perfil -->
+    <EditProfilePopup v-if="isProfilePopupVisible" @close="isProfilePopupVisible = false" />
   </div>
 </template>
 
 <script>
 import Navbar from '@/components/Navbar.vue'
+import EditProfilePopup from '@/components/EditProfilePopup.vue'
 
 export default {
   name: 'PanelUsuario',
   components: {
-    Navbar
+    Navbar,
+    EditProfilePopup
+  },
+  data() {
+    return {
+      isProfilePopupVisible: false
+    }
+  },
+  methods: {
+    openProfilePopup() {
+      this.isProfilePopupVisible = true
+    }
   }
 }
 </script>
