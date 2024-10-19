@@ -105,29 +105,43 @@
       </div>
     </footer>
 
+    <!-- Popup de perfil de usuario -->
+    <UserProfilePopup
+      v-if="isProfilePopupVisible"
+      @close="isProfilePopupVisible = false"
+      @edit-profile="openEditProfilePopup"
+    />
+
     <!-- Popup de edición de perfil -->
-    <EditProfilePopup v-if="isProfilePopupVisible" @close="isProfilePopupVisible = false" />
+    <EditProfilePopup v-if="isEditProfilePopupVisible" @close="isEditProfilePopupVisible = false" />
   </div>
 </template>
 
 <script>
 import Navbar from '@/components/Navbar.vue'
+import UserProfilePopup from '@/components/UserProfilePopup.vue'
 import EditProfilePopup from '@/components/EditProfilePopup.vue'
 
 export default {
   name: 'PanelUsuario',
   components: {
     Navbar,
+    UserProfilePopup,
     EditProfilePopup
   },
   data() {
     return {
-      isProfilePopupVisible: false
+      isProfilePopupVisible: false, // Controla la visibilidad del popup de perfil
+      isEditProfilePopupVisible: false // Controla la visibilidad del popup de edición
     }
   },
   methods: {
     openProfilePopup() {
-      this.isProfilePopupVisible = true
+      this.isProfilePopupVisible = true // Abre el popup de perfil
+    },
+    openEditProfilePopup() {
+      this.isProfilePopupVisible = false // Cierra el popup de perfil
+      this.isEditProfilePopupVisible = true // Abre el popup de edición de perfil
     }
   }
 }

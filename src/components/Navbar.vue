@@ -63,8 +63,8 @@ export default {
   },
   data() {
     return {
-      showLoginPopupVisible: false,
-      showRegisterPopupVisible: false
+      showLoginPopupVisible: false, // Controla si el popup de login está visible
+      showRegisterPopupVisible: false // Controla si el popup de registro está visible
     }
   },
   methods: {
@@ -81,6 +81,10 @@ export default {
     showRegisterPopup() {
       this.showRegisterPopupVisible = true
       this.showLoginPopupVisible = false
+    },
+    // Cerrar el popup de registro
+    closeRegisterPopup() {
+      this.showRegisterPopupVisible = false
     },
     // Cambiar de login a registro
     switchToRegister() {
