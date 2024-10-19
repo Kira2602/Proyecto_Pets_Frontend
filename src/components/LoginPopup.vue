@@ -8,14 +8,14 @@
         </div>
         <div class="login-form">
           <h2>Iniciar Sesión</h2>
-          <form>
+          <form @submit.prevent="login">
             <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Email" />
-
+            <input type="email" v-model="email" id="email" placeholder="Email" />
             <label for="password">Contraseña</label>
             <div class="password-wrapper">
               <input
                 :type="showPassword ? 'text' : 'password'"
+                v-model="password"
                 id="password"
                 placeholder="Contraseña"
               />
@@ -38,10 +38,14 @@
 </template>
 
 <script>
+import axios from 'axios'
+import Swal from 'sweetalert2' 
 export default {
   name: 'LoginPopup',
   data() {
     return {
+      email: '',
+      password: '',
       showPassword: false
     }
   },
@@ -57,10 +61,40 @@ export default {
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword
+    },
+    async login() {
+      try {
+        const response = await axios.post('http://127.0.0.1:5000/usuario/login', {
+          email: this.email,
+          contrasenia: this.password  
+        });
+
+        if (response.data.token) {
+          localStorage.setItem('authToken', response.data.token);
+          Swal.fire({
+          icon: 'success',
+          title: 'Login exitoso',
+          text: 'Has iniciado sesión correctamente',
+          showConfirmButton: false,
+          timer: 1500  // La alerta se cerrará automáticamente después de 1.5 segundos
+          });
+          this.closePopup(); 
+        }
+      } catch (error) {
+        console.error('Error en el login:', error.response ? error.response.data : error.message);
+        this.closePopup();
+        Swal.fire({
+        icon: 'error',
+        title: 'Login fallido',
+        text: 'Verifica tus credenciales e intenta nuevamente',
+        showConfirmButton: true
+        });
+      }
     }
   }
 }
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');

@@ -38,3 +38,12 @@ npm run lint
 ```sh
 npm install @fortawesome/fontawesome-free
 ```
+### intalacion para conexion back-front 
+```sh
+npm install axios
+```
+### intalacion para alertas
+```sh
+npm install sweetalert2
+
+```
