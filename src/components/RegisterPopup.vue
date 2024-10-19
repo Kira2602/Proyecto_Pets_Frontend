@@ -8,20 +8,21 @@
         </div>
         <div class="register-form">
           <h2>Registrarse</h2>
-          <form>
+          <form @submit.prevent="register">
             <label for="name">Nombre</label>
-            <input type="text" id="name" placeholder="Nombre" />
+            <input type="text" v-model="nombre" id="name" placeholder="Nombre" />
 
             <label for="phone">Teléfono</label>
-            <input type="text" id="phone" placeholder="Teléfono" />
+            <input type="text" v-model="telefono" id="phone" placeholder="Teléfono" />
 
             <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Email" />
+            <input type="email" v-model="email" id="email" placeholder="Email" />
 
             <label for="password">Contraseña</label>
             <div class="password-wrapper">
               <input
                 :type="showPassword ? 'text' : 'password'"
+                v-model="contrasenia"
                 id="password"
                 placeholder="Contraseña"
               />
@@ -39,10 +40,17 @@
 </template>
 
 <script>
+import axios from 'axios'
+import Swal from 'sweetalert2' 
+
 export default {
   name: 'RegisterPopup',
   data() {
     return {
+      nombre: '',
+      telefono: '',
+      email: '',
+      contrasenia: '',
       showPassword: false
     }
   },
@@ -58,6 +66,31 @@ export default {
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword
+    },
+    async register() {
+      try {
+        const response = await axios.post('http://127.0.0.1:5000/usuario/create', {
+          nombre: this.nombre,
+          telefono: this.telefono,
+          email: this.email,
+          contrasenia: this.contrasenia
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Registro exitoso',
+          text: 'Usuario creado correctamente',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        this.closePopup();  
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en el registro',
+          text: 'No se pudo crear el usuario. Verifica los datos e intenta nuevamente',
+          showConfirmButton: true
+        });
+      }
     }
   }
 }
