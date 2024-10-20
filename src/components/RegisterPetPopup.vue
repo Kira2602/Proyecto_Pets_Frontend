@@ -14,10 +14,9 @@
           <div v-if="step === 1">
             <form @submit.prevent="goToStep2">
               <div class="form-group">
-                <label for="name">Nombre:</label>
-                <input class="static-data" type="text" id="name" v-model="petData.name" required />
+                <label for="nombre">Nombre:</label>
+                <input class="static-data" type="text" id="nombre" v-model="petData.nombre" required />
               </div>
-              <!-- Fecha de nacimiento y Especie -->
               <div class="form-group">
                 <label for="birthdate">Fecha de nacimiento:</label>
                 <input class="static-data" type="date" id="birthdate" v-model="petData.fecha_nacimiento" required />
@@ -26,9 +25,11 @@
                 <label for="especie">Especie:</label>
                 <select class="static-data" id="especie" v-model="petData.especie_id_especie" required>
                   <option disabled value="">Selecciona una especie</option>
-                  <option v-for="especie in especies" :key="especie.id" :value="especie.id">{{ especie.nombre }}</option>
+                  <option v-for="especie in especies" :key="especie.id_especie" :value="especie.id_especie">
+                    {{ especie.especie }}
+                  </option>
                 </select>
-            </div>
+              </div>
             <div class="form-group sexo-group">
               <div class="sexo-options">
                 <label class="sexo-label">
@@ -63,8 +64,8 @@
                 <input class="static-data" type="number" id="peso" v-model="petData.peso" required />
               </div>
               <div class="form-group">
-                <label for="informacion_adicional">Información Adicional:</label>
-                <textarea class="static-data" id="informacion_adicional" v-model="petData.informacion_adicional"></textarea>
+                <label for="descripcion">Información Adicional:</label>
+                <textarea class="static-data" id="descripcion" v-model="petData.descripcion"></textarea>
               </div>
               <div class="button-group2">
                 <button  class="btn-edit" @click="goBack">Atrás</button>
@@ -80,28 +81,35 @@
   
   <script>
   import lottie from 'lottie-web';
+  import axios from 'axios';
+  
+
+
 
   export default {
     data() {
       return {
-        step: 1,  // Controla el paso del formulario
+        step: 1,  
+        
         petData: {
-          name: '',
+          nombre: '',
           fecha_nacimiento: '',
           sexo: '',
           raza: '',
           color: '',
           peso: '',
-          informacion_adicional: '',
-          especie_id_especie: ''
+          descripcion: '',
+          especie_id_especie: '',
+          Usuario_id_usuario: '' 
+
         },
+        especies: [] 
       };
       
     },
     methods: {
       goToStep2() {
-        // Validar los campos del primer paso antes de pasar al segundo
-        if (this.petData.name && this.petData.fecha_nacimiento) {
+        if (this.petData.nombre && this.petData.fecha_nacimiento) {
           this.step = 2;
         } else {
           alert('Por favor completa todos los campos.');
@@ -111,20 +119,48 @@
         this.step = 1;
       },
       submitRegistration() {
-        this.$http.post('/api/mascotas', this.petData)
-          .then(response => {
-            console.log('Registro completado', response.data);
-            this.closePopup(); 
-          })
-          .catch(error => {
-            console.error('Error al registrar la mascota', error);
-          });
-      },
+  console.log("Datos enviados:", this.petData); 
+  axios.post('http://127.0.0.1:5000/mascota/create', this.petData)
+    .then(response => {
+      console.log('Registro completado', response.data);
+      this.closePopup();
+      alert('Mascota registrada correctamente');
+    })
+    .catch(error => {
+      if (error.response) {
+        console.error('Error en el servidor:', error.response.data);
+        alert(`Error al registrar la mascota: ${error.response.data.error || 'Datos incorrectos'}`);
+      } else {
+        console.error('Error al registrar la mascota:', error.message);
+        alert('No se pudo conectar con el servidor.');
+      }
+    });
+},
+
+
       closePopup() {
         this.$emit('close'); 
+      },
+      async fetchEspecies() {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/especie/get')
+        this.especies = response.data
+        console.log('Especies obtenidas:', this.especies) 
+      } catch (error) {
+        console.error('Error al obtener las especies:', error)
       }
+    }
     },
     mounted() {
+      const usuarioId = localStorage.getItem('Usuario_id_usuario');
+    if (usuarioId) {
+      this.petData.Usuario_id_usuario = usuarioId; 
+    } else {
+      console.error('No se pudo obtener el ID del usuario. Debes iniciar sesión.');
+      alert('Debes iniciar sesión para registrar una mascota.');
+      this.closePopup();
+    }
+    this.fetchEspecies()
     // contenedor de lottiefile
     if (this.$refs.lottieContainer) {
       lottie.loadAnimation({
