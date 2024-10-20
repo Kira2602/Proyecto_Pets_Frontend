@@ -39,7 +39,8 @@
 
 <script>
 import axios from 'axios'
-import Swal from 'sweetalert2' 
+import Swal from 'sweetalert2'
+
 export default {
   name: 'LoginPopup',
   data() {
@@ -66,35 +67,53 @@ export default {
       try {
         const response = await axios.post('http://127.0.0.1:5000/usuario/login', {
           email: this.email,
-          contrasenia: this.password  
+          contrasenia: this.password
         });
+        console.log('Respuesta de login:', response.data);
 
-        if (response.data.token) {
-          localStorage.setItem('authToken', response.data.token);
+        // Almacenar el ID del usuario en localStorage
+        if (response.data.id_usuario) {
+          localStorage.setItem('Usuario_id_usuario', response.data.id_usuario);
+        } else {
+          console.error('No se recibió id_usuario en la respuesta');
+          alert('No se pudo obtener el ID del usuario.');
+          return;
+        }
+
+        if (response.data.token && response.data.nombre) {
+          localStorage.setItem('authToken', response.data.token)
+          localStorage.setItem('nombre', response.data.nombre)
+
           Swal.fire({
-          icon: 'success',
-          title: 'Login exitoso',
-          text: 'Has iniciado sesión correctamente',
-          showConfirmButton: false,
-          timer: 1500  // La alerta se cerrará automáticamente después de 1.5 segundos
-          });
-          this.closePopup(); 
+            icon: 'success',
+            title: 'Login exitoso',
+            text: 'Has iniciado sesión correctamente',
+            confirmButtonText: 'OK',
+            customClass: {
+              confirmButton: 'my-swal-button'
+            }
+          })
+
+          this.closePopup()
+          this.$router.push('/panel-usuario')
         }
       } catch (error) {
-        console.error('Error en el login:', error.response ? error.response.data : error.message);
-        this.closePopup();
+        console.error('Error en el login:', error.response ? error.response.data : error.message)
+
         Swal.fire({
-        icon: 'error',
-        title: 'Login fallido',
-        text: 'Verifica tus credenciales e intenta nuevamente',
-        showConfirmButton: true
-        });
+          icon: 'error',
+          title: 'Login fallido',
+          text: 'Verifica tus credenciales e intenta nuevamente',
+          confirmButtonText: 'OK',
+          customClass: {
+            confirmButton: 'my-swal-button'
+          }
+        })
       }
     }
   }
 }
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -119,7 +138,7 @@ export default {
 .login-popup {
   background-color: white;
   border-radius: 30px;
-  width: 800px; /* Ajuste para pantallas más grandes */
+  width: 800px;
   height: 520px;
   padding: 20px;
   max-width: 90%;
@@ -151,7 +170,7 @@ export default {
 }
 
 .login-image img {
-  width: 100%; /* Asegura que la imagen ocupe su contenedor */
+  width: 100%;
   max-width: 360px;
   height: auto;
   border-radius: 30px;
@@ -198,7 +217,7 @@ export default {
   position: absolute;
   top: 50%;
   right: 65px;
-  transform: translateY(-50%);
+  transform: translateY(-70%);
   cursor: pointer;
   font-size: 1.2rem;
   color: #af8a8a;
@@ -252,6 +271,20 @@ export default {
   font-size: 14px;
   color: #9d9189;
   margin-top: 20px;
+}
+
+.my-swal-button {
+  background-color: #ffcad4 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+  font-size: 16px !important;
+}
+
+.my-swal-button:hover {
+  background-color: #f4a8a9 !important;
+  color: white !important;
 }
 
 /* Ajustes responsivos */

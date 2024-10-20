@@ -38,7 +38,7 @@ npm run lint
 ```sh
 npm install @fortawesome/fontawesome-free
 ```
-### intalacion para conexion back-front 
+### instalacion para conexion back-front 
 ```sh
 npm install axios
 ```

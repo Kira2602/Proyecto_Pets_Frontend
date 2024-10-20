@@ -8,7 +8,7 @@
     <section class="panel-usuario">
       <h2>PANEL DE USUARIO</h2>
       <div class="icon-grid">
-        <div class="icon-card">
+        <div class="icon-card" @click="openProfilePopup">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/perfil_usuario.png" alt="Perfil de usuario" />
@@ -16,7 +16,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="openRegisterPetPopup">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/agregar_mascota.png" alt="Registrar Mascotas" />
@@ -104,16 +104,72 @@
         <p>© 2024 Grupo PetCare. Todos los derechos reservados.</p>
       </div>
     </footer>
+
+    <!-- Popup de perfil de usuario -->
+    <UserProfilePopup
+      v-if="isProfilePopupVisible"
+      @close="isProfilePopupVisible = false"
+      @edit-profile="openEditProfilePopup"
+    />
+
+    <!-- Popup de edición de perfil -->
+    <EditProfilePopup 
+    v-if="isEditProfilePopupVisible" 
+    @close="isEditProfilePopupVisible = false" />
+
+    <RegisterPetPopup 
+    v-if="isRegisterPetPopupVisible" 
+    @close="isRegisterPetPopupVisible = false" />
   </div>
 </template>
 
 <script>
 import Navbar from '@/components/Navbar.vue'
+import UserProfilePopup from '@/components/UserProfilePopup.vue'
+import EditProfilePopup from '@/components/EditProfilePopup.vue'
+import RegisterPetPopup from '@/components/RegisterPetPopup.vue';
 
 export default {
   name: 'PanelUsuario',
   components: {
-    Navbar
+    Navbar,
+    UserProfilePopup,
+    EditProfilePopup,
+    RegisterPetPopup
+  },
+  data() {
+    return {
+      isProfilePopupVisible: false, // Controla la visibilidad del popup de perfil
+      isEditProfilePopupVisible: false, // Controla la visibilidad del popup de edición
+      isRegisterPetPopupVisible: false, // Controla la visibilidad del popup de perfil
+      usuarioId: null, // ID del usuario almacenado
+
+    }
+  },
+  methods: {
+    
+    openProfilePopup() {
+      this.isProfilePopupVisible = true // Abre el popup de perfil
+    },
+    openEditProfilePopup() {
+      this.isProfilePopupVisible = false // Cierra el popup de perfil
+      this.isEditProfilePopupVisible = true // Abre el popup de edición de perfil
+    },
+    openRegisterPetPopup() {
+      this.isRegisterPetPopupVisible = true // Abre el popup de perfil
+      this.usuarioId = localStorage.getItem('Usuario_id_usuario');
+      if (this.usuarioId) {
+        this.isRegisterPetPopupVisible = true; 
+      } else {
+        alert('Debes iniciar sesión para registrar una mascota.');
+      }
+    },
+  },
+    mounted() {
+    this.usuarioId = localStorage.getItem('Usuario_id_usuario');
+    if (!this.usuarioId) {
+      this.$router.push('/login');
+    }
   }
 }
 </script>

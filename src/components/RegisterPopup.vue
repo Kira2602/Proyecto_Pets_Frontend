@@ -41,10 +41,16 @@
 
 <script>
 import axios from 'axios'
-import Swal from 'sweetalert2' 
+import Swal from 'sweetalert2'
 
 export default {
   name: 'RegisterPopup',
+  props: {
+    isVisible: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       nombre: '',
@@ -54,15 +60,9 @@ export default {
       showPassword: false
     }
   },
-  props: {
-    isVisible: {
-      type: Boolean,
-      default: false
-    }
-  },
   methods: {
     closePopup() {
-      this.$emit('close')
+      this.$emit('close') // Emitiendo el evento 'close' para que el popup se cierre
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword
@@ -74,22 +74,22 @@ export default {
           telefono: this.telefono,
           email: this.email,
           contrasenia: this.contrasenia
-        });
+        })
         Swal.fire({
           icon: 'success',
           title: 'Registro exitoso',
           text: 'Usuario creado correctamente',
           showConfirmButton: false,
           timer: 1500
-        });
-        this.closePopup();  
+        })
+        this.closePopup() // Cerrando el popup después de un registro exitoso
       } catch (error) {
         Swal.fire({
           icon: 'error',
           title: 'Error en el registro',
           text: 'No se pudo crear el usuario. Verifica los datos e intenta nuevamente',
           showConfirmButton: true
-        });
+        })
       }
     }
   }
@@ -199,7 +199,7 @@ export default {
   position: absolute;
   top: 50%;
   right: 65px;
-  transform: translateY(-50%);
+  transform: translateY(-70%);
   cursor: pointer;
   font-size: 1.2rem;
   color: #af8a8a;
