@@ -16,7 +16,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="openRegisterPetPopup">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/agregar_mascota.png" alt="Registrar Mascotas" />
@@ -113,7 +113,13 @@
     />
 
     <!-- Popup de edición de perfil -->
-    <EditProfilePopup v-if="isEditProfilePopupVisible" @close="isEditProfilePopupVisible = false" />
+    <EditProfilePopup 
+    v-if="isEditProfilePopupVisible" 
+    @close="isEditProfilePopupVisible = false" />
+
+    <RegisterPetPopup 
+    v-if="isRegisterPetPopupVisible" 
+    @close="isRegisterPetPopupVisible = false" />
   </div>
 </template>
 
@@ -121,18 +127,22 @@
 import Navbar from '@/components/Navbar.vue'
 import UserProfilePopup from '@/components/UserProfilePopup.vue'
 import EditProfilePopup from '@/components/EditProfilePopup.vue'
+import RegisterPetPopup from '@/components/RegisterPetPopup.vue';
 
 export default {
   name: 'PanelUsuario',
   components: {
     Navbar,
     UserProfilePopup,
-    EditProfilePopup
+    EditProfilePopup,
+    RegisterPetPopup
   },
   data() {
     return {
       isProfilePopupVisible: false, // Controla la visibilidad del popup de perfil
-      isEditProfilePopupVisible: false // Controla la visibilidad del popup de edición
+      isEditProfilePopupVisible: false, // Controla la visibilidad del popup de edición
+      isRegisterPetPopupVisible: false, // Controla la visibilidad del popup de perfil
+
     }
   },
   methods: {
@@ -142,7 +152,10 @@ export default {
     openEditProfilePopup() {
       this.isProfilePopupVisible = false // Cierra el popup de perfil
       this.isEditProfilePopupVisible = true // Abre el popup de edición de perfil
-    }
+    },
+    openRegisterPetPopup() {
+      this.isRegisterPetPopupVisible = true // Abre el popup de perfil
+    },
   }
 }
 </script>
