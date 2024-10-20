@@ -142,10 +142,12 @@ export default {
       isProfilePopupVisible: false, // Controla la visibilidad del popup de perfil
       isEditProfilePopupVisible: false, // Controla la visibilidad del popup de edición
       isRegisterPetPopupVisible: false, // Controla la visibilidad del popup de perfil
+      usuarioId: null, // ID del usuario almacenado
 
     }
   },
   methods: {
+    
     openProfilePopup() {
       this.isProfilePopupVisible = true // Abre el popup de perfil
     },
@@ -155,7 +157,19 @@ export default {
     },
     openRegisterPetPopup() {
       this.isRegisterPetPopupVisible = true // Abre el popup de perfil
+      this.usuarioId = localStorage.getItem('Usuario_id_usuario');
+      if (this.usuarioId) {
+        this.isRegisterPetPopupVisible = true; 
+      } else {
+        alert('Debes iniciar sesión para registrar una mascota.');
+      }
     },
+  },
+    mounted() {
+    this.usuarioId = localStorage.getItem('Usuario_id_usuario');
+    if (!this.usuarioId) {
+      this.$router.push('/login');
+    }
   }
 }
 </script>
