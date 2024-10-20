@@ -17,10 +17,18 @@
                 <label for="name">Nombre:</label>
                 <input class="static-data" type="text" id="name" v-model="petData.name" required />
               </div>
+              <!-- Fecha de nacimiento y Especie -->
               <div class="form-group">
                 <label for="birthdate">Fecha de nacimiento:</label>
                 <input class="static-data" type="date" id="birthdate" v-model="petData.fecha_nacimiento" required />
               </div>
+              <div class="form-group">
+                <label for="especie">Especie:</label>
+                <select class="static-data" id="especie" v-model="petData.especie_id_especie" required>
+                  <option disabled value="">Selecciona una especie</option>
+                  <option v-for="especie in especies" :key="especie.id" :value="especie.id">{{ especie.nombre }}</option>
+                </select>
+            </div>
             <div class="form-group sexo-group">
               <div class="sexo-options">
                 <label class="sexo-label">
@@ -84,9 +92,11 @@
           raza: '',
           color: '',
           peso: '',
-          informacion_adicional: ''
-        }
+          informacion_adicional: '',
+          especie_id_especie: ''
+        },
       };
+      
     },
     methods: {
       goToStep2() {
