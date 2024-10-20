@@ -39,7 +39,8 @@
 
 <script>
 import axios from 'axios'
-import Swal from 'sweetalert2' 
+import Swal from 'sweetalert2'
+
 export default {
   name: 'LoginPopup',
   data() {
@@ -66,35 +67,36 @@ export default {
       try {
         const response = await axios.post('http://127.0.0.1:5000/usuario/login', {
           email: this.email,
-          contrasenia: this.password  
-        });
+          contrasenia: this.password
+        })
 
         if (response.data.token) {
-          localStorage.setItem('authToken', response.data.token);
+          localStorage.setItem('authToken', response.data.token)
+
           Swal.fire({
-          icon: 'success',
-          title: 'Login exitoso',
-          text: 'Has iniciado sesión correctamente',
-          showConfirmButton: false,
-          timer: 1500  // La alerta se cerrará automáticamente después de 1.5 segundos
-          });
-          this.closePopup(); 
+            icon: 'success',
+            title: 'Login exitoso',
+            text: 'Has iniciado sesión correctamente',
+            showConfirmButton: false,
+            timer: 1500
+          })
+          this.closePopup()
+          this.$router.push('/panel-usuario')
         }
       } catch (error) {
-        console.error('Error en el login:', error.response ? error.response.data : error.message);
-        this.closePopup();
+        console.error('Error en el login:', error.response ? error.response.data : error.message)
+
         Swal.fire({
-        icon: 'error',
-        title: 'Login fallido',
-        text: 'Verifica tus credenciales e intenta nuevamente',
-        showConfirmButton: true
-        });
+          icon: 'error',
+          title: 'Login fallido',
+          text: 'Verifica tus credenciales e intenta nuevamente',
+          showConfirmButton: true
+        })
       }
     }
   }
 }
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -119,7 +121,7 @@ export default {
 .login-popup {
   background-color: white;
   border-radius: 30px;
-  width: 800px; /* Ajuste para pantallas más grandes */
+  width: 800px;
   height: 520px;
   padding: 20px;
   max-width: 90%;
@@ -151,7 +153,7 @@ export default {
 }
 
 .login-image img {
-  width: 100%; /* Asegura que la imagen ocupe su contenedor */
+  width: 100%;
   max-width: 360px;
   height: auto;
   border-radius: 30px;
