@@ -70,16 +70,20 @@ export default {
           contrasenia: this.password
         })
 
-        if (response.data.token) {
+        if (response.data.token && response.data.nombre) {
           localStorage.setItem('authToken', response.data.token)
+          localStorage.setItem('nombre', response.data.nombre)
 
           Swal.fire({
             icon: 'success',
             title: 'Login exitoso',
             text: 'Has iniciado sesión correctamente',
-            showConfirmButton: false,
-            timer: 1500
+            confirmButtonText: 'OK',
+            customClass: {
+              confirmButton: 'my-swal-button'
+            }
           })
+
           this.closePopup()
           this.$router.push('/panel-usuario')
         }
@@ -90,7 +94,10 @@ export default {
           icon: 'error',
           title: 'Login fallido',
           text: 'Verifica tus credenciales e intenta nuevamente',
-          showConfirmButton: true
+          confirmButtonText: 'OK',
+          customClass: {
+            confirmButton: 'my-swal-button'
+          }
         })
       }
     }
@@ -254,6 +261,20 @@ export default {
   font-size: 14px;
   color: #9d9189;
   margin-top: 20px;
+}
+
+.my-swal-button {
+  background-color: #ffcad4 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+  font-size: 16px !important;
+}
+
+.my-swal-button:hover {
+  background-color: #f4a8a9 !important;
+  color: white !important;
 }
 
 /* Ajustes responsivos */

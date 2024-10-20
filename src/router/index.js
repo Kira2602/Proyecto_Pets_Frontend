@@ -12,7 +12,7 @@ const router = createRouter({
     },
     {
       path: '/panel-usuario',
-      name: 'PanelUsuario',
+      name: 'panel-usuario',
       component: PanelUsuario
     }
   ]

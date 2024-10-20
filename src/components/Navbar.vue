@@ -5,8 +5,8 @@
       <img src="@/components/images/nav_bar_logo.png" alt="Logo" class="logo-img" />
     </div>
 
-    <!-- Menú normal para pantallas grandes -->
-    <div class="menu-desktop">
+    <!-- Menú para cuando el usuario NO ha iniciado sesión -->
+    <div v-if="!isAuthenticated" class="menu-desktop">
       <ul class="menu">
         <li><a href="#encabezado" class="menu-link">Inicio</a></li>
         <li><a href="#funcionalidades" class="menu-link">Funcionalidades</a></li>
@@ -18,6 +18,32 @@
       </div>
     </div>
 
+    <!-- Menú para cuando el usuario ha iniciado sesión -->
+    <div v-else class="menu-desktop">
+      <ul class="menu">
+        <!-- Mostrar menú para usuarios logueados -->
+        <li><a @click.prevent="redirectToInicio" class="menu-link">Inicio</a></li>
+        <li v-if="isOnInicio"><a href="#funcionalidades" class="menu-link">Funcionalidades</a></li>
+        <li v-if="isOnInicio"><a href="#redes" class="menu-link">Redes Sociales</a></li>
+        <!-- Siempre mostrar "Panel de Usuario" si el usuario está logueado -->
+        <li><a @click.prevent="redirectToPanel" class="menu-link">Panel de Usuario</a></li>
+      </ul>
+      <div class="user-info">
+        <i class="fas fa-bell"></i>
+        <div class="user-profile" @click="toggleDropdown">
+          <i class="fas fa-user-circle"></i>
+          <span>{{ username }}</span>
+        </div>
+
+        <!-- Menú desplegable para cerrar sesión -->
+        <div v-if="dropdownOpen" class="dropdown-menu">
+          <ul>
+            <li @click="confirmLogout">Cerrar sesión</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- Menú hamburguesa para móviles/tablets -->
     <div class="menuToggle">
       <input type="checkbox" />
@@ -25,15 +51,14 @@
       <span></span>
       <span></span>
       <ul class="menuItem">
-        <li><a href="#encabezado" class="menu-link" @click="closeMobileMenu">Inicio</a></li>
-        <li>
-          <a href="#funcionalidades" class="menu-link" @click="closeMobileMenu">Funcionalidades</a>
-        </li>
-        <li><a href="#redes" class="menu-link" @click="closeMobileMenu">Redes Sociales</a></li>
-        <li>
+        <li><a @click.prevent="redirectToInicio" class="menu-link">Inicio</a></li>
+        <li v-if="isOnInicio"><a href="#funcionalidades" class="menu-link">Funcionalidades</a></li>
+        <li v-if="isOnInicio"><a href="#redes" class="menu-link">Redes Sociales</a></li>
+        <li><a @click.prevent="redirectToPanel" class="menu-link">Panel de Usuario</a></li>
+        <li v-if="!isAuthenticated">
           <button class="btn btn-outline" @click="showLoginPopup">Iniciar Sesión</button>
         </li>
-        <li>
+        <li v-if="!isAuthenticated">
           <button class="btn btn-filled" @click="showRegisterPopup">Registrarse</button>
         </li>
       </ul>
@@ -54,6 +79,7 @@
 <script>
 import LoginPopup from '@/components/LoginPopup.vue'
 import RegisterPopup from '@/components/RegisterPopup.vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'Navbar',
@@ -63,33 +89,97 @@ export default {
   },
   data() {
     return {
-      showLoginPopupVisible: false, // Controla si el popup de login está visible
-      showRegisterPopupVisible: false // Controla si el popup de registro está visible
+      isAuthenticated: false,
+      username: '',
+      showLoginPopupVisible: false,
+      showRegisterPopupVisible: false,
+      dropdownOpen: false,
+      isOnInicio: false
+    }
+  },
+  mounted() {
+    this.checkAuthentication()
+    this.checkRoute()
+  },
+  watch: {
+    '$route.name'() {
+      this.checkAuthentication()
+      this.checkRoute()
     }
   },
   methods: {
-    // Mostrar el popup de login
+    checkAuthentication() {
+      const token = localStorage.getItem('authToken')
+      if (token) {
+        this.isAuthenticated = true
+        this.username = localStorage.getItem('nombre')
+      } else {
+        this.isAuthenticated = false
+        this.username = ''
+      }
+    },
+    checkRoute() {
+      // Actualizar isOnInicio dependiendo de la ruta
+      this.isOnInicio = this.$route.name === 'inicio'
+    },
     showLoginPopup() {
       this.showLoginPopupVisible = true
       this.showRegisterPopupVisible = false
     },
-    // Cerrar el popup de login
     closeLoginPopup() {
       this.showLoginPopupVisible = false
     },
-    // Mostrar el popup de registro
     showRegisterPopup() {
       this.showRegisterPopupVisible = true
       this.showLoginPopupVisible = false
     },
-    // Cerrar el popup de registro
     closeRegisterPopup() {
       this.showRegisterPopupVisible = false
     },
-    // Cambiar de login a registro
     switchToRegister() {
       this.showLoginPopupVisible = false
       this.showRegisterPopupVisible = true
+    },
+    toggleDropdown() {
+      this.dropdownOpen = !this.dropdownOpen
+    },
+    confirmLogout() {
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: '¿Deseas cerrar sesión?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#9d8189',
+        cancelButtonColor: '#ffcad4',
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar',
+        customClass: {
+          confirmButton: 'my-confirm-button',
+          cancelButton: 'my-cancel-button'
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.logout()
+        }
+      })
+    },
+    logout() {
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('nombre')
+      this.isAuthenticated = false
+      this.$router.push('/')
+      Swal.fire({
+        title: 'Sesión cerrada',
+        text: 'Has cerrado sesión correctamente.',
+        icon: 'success',
+        confirmButtonColor: '#9d8189'
+      })
+    },
+    redirectToInicio() {
+      this.$router.push({ name: 'inicio' })
+    },
+    redirectToPanel() {
+      this.$router.push({ name: 'panel-usuario' })
     }
   }
 }
@@ -97,6 +187,7 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+@import '@fortawesome/fontawesome-free/css/all.css';
 
 * {
   font-family: 'Poppins', sans-serif;
@@ -180,6 +271,65 @@ li {
 .btn-filled:hover {
   background-color: #f4cfc6;
   color: #db7f67;
+}
+
+/* Estilos de usuario */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #9d8189;
+  position: relative;
+}
+
+.user-info i {
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.user-profile i {
+  font-size: 2rem;
+}
+
+.user-profile span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #45413e;
+}
+
+/* Estilos del menú desplegable */
+.dropdown-menu {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 999;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-menu li {
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f4f4f4;
 }
 
 /* Estilos del menú hamburguesa para móviles/tablets */
@@ -275,5 +425,24 @@ li {
   .menuToggle {
     display: block;
   }
+}
+
+/* Estilos personalizados para botones de SweetAlert */
+.my-confirm-button {
+  background-color: #9d8189 !important;
+  color: white !important;
+}
+
+.my-cancel-button {
+  background-color: #ffcad4 !important;
+  color: white !important;
+}
+
+.my-confirm-button:hover {
+  background-color: #7a6652 !important;
+}
+
+.my-cancel-button:hover {
+  background-color: #f4acb7 !important;
 }
 </style>
