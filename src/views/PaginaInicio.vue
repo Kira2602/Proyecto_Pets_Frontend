@@ -107,21 +107,17 @@
         <p>© 2024 Grupo PetCare. Todos los derechos reservados.</p>
       </div>
     </footer>
-
-    <!-- Login Popup -->
-    <LoginPopup v-if="isLoginPopupVisible" @close="isLoginPopupVisible = false" />
   </div>
 </template>
 
 <script>
 import Navbar from '@/components/Navbar.vue'
-import LoginPopup from '@/components/LoginPopup.vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'inicio',
   components: {
-    Navbar,
-    LoginPopup // Asegúrate de que LoginPopup está correctamente importado
+    Navbar
   },
   data() {
     return {
@@ -150,9 +146,14 @@ export default {
         // Usuario logueado, redirigir al panel de usuario
         this.$router.push({ name: 'panel-usuario' })
       } else {
-        // Usuario no logueado, mostrar popup de login
-        this.isLoginPopupVisible = true
-        console.log('Usuario no logueado. Mostrando LoginPopup.') // Debugging log
+        // Usuario no logueado, mostrar alerta de que debe iniciar sesión
+        Swal.fire({
+          icon: 'warning',
+          title: 'Inicia sesión',
+          text: 'Debes iniciar sesión para acceder a esta funcionalidad.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#db7f67'
+        })
       }
     }
   }

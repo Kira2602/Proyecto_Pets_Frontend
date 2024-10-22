@@ -198,8 +198,11 @@ export default {
       })
     },
     logout() {
+      // Eliminar todos los datos del localStorage relacionados con la sesión del usuario
       localStorage.removeItem('authToken')
+      localStorage.removeItem('Usuario_id_usuario')
       localStorage.removeItem('nombre')
+
       this.isAuthenticated = false
       this.$router.push('/')
       Swal.fire({
