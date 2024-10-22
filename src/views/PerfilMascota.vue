@@ -7,21 +7,51 @@
     <div class="perfil-mascota-container">
       <div class="animated-border">
         <div class="mascota-card">
-          <div class="mascota-img-container">
-            <img :src="mascotaImagen" alt="Imagen de mascota" class="mascota-img" />
+          <div class="mascota-details">
+            <h2>{{ isEditMode ? ' ' + mascota.nombre : mascota.nombre }}</h2>
+            <div class="mascota-img-container">
+              <img :src="mascotaImagen" alt="Imagen de mascota" class="mascota-img" />
+            </div>
           </div>
 
-          <div class="mascota-info">
-            <h2>{{ mascota.nombre }}</h2>
-            <p><strong>Edad:</strong> {{ mascota.edad }}</p>
-            <p><strong>Raza:</strong> {{ mascota.raza }}</p>
-            <p><strong>Peso:</strong> {{ mascota.peso }} kg</p>
-            <p><strong>Más detalles:</strong> {{ mascota.detalles }}</p>
-          </div>
+          <div class="flex-row-container">
+            <div class="mascota-info">
+              <!-- Mostrar input para fecha de nacimiento cuando se edita, y la edad cuando no -->
+              <div class="input-group">
+                <label><strong>Nombre:</strong></label>
+                <input type="text" v-model="mascota.nombre" :disabled="!isEditMode" />
+              </div>
+              <div class="input-group">
+                <label><strong>Edad:</strong></label>
+                <input v-if="isEditMode" type="date" v-model="mascota.fecha_nacimiento" />
+                <input
+                  v-else
+                  type="text"
+                  :value="calcularEdad(mascota.fecha_nacimiento) + ' años'"
+                  disabled
+                />
+              </div>
 
-          <button class="editar-btn" @click="editarMascota">
-            <i class="fas fa-edit"></i>
-          </button>
+              <div class="input-group">
+                <label><strong>Raza:</strong></label>
+                <input type="text" v-model="mascota.raza" :disabled="!isEditMode" />
+              </div>
+
+              <div class="input-group">
+                <label><strong>Peso:</strong></label>
+                <input type="number" step="0.01" v-model="mascota.peso" :disabled="!isEditMode" />
+              </div>
+
+              <div class="input-group">
+                <label><strong>Más detalles:</strong></label>
+                <textarea v-model="mascota.descripcion" :disabled="!isEditMode"></textarea>
+              </div>
+            </div>
+
+            <button class="editar-btn" @click="isEditMode ? guardarCambios() : toggleEditMode()">
+              <i :class="isEditMode ? 'fas fa-save' : 'fas fa-edit'"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -37,6 +67,7 @@
 <script>
 import Navbar from '@/components/Navbar.vue'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 import defaultMascotaImage from '@/components/images/perfil_mascota.jpeg'
 
 export default {
@@ -47,7 +78,8 @@ export default {
   data() {
     return {
       mascota: {},
-      mascotaImagen: defaultMascotaImage
+      mascotaImagen: defaultMascotaImage,
+      isEditMode: false // Agrega este estado para habilitar/deshabilitar la edición
     }
   },
   methods: {
@@ -57,15 +89,52 @@ export default {
         const response = await axios.get(`http://127.0.0.1:5000/mascota/perfil/${mascotaId}`)
         this.mascota = response.data
 
-        if (this.mascota.imagen) {
-          this.mascotaImagen = this.mascota.imagen
+        if (this.mascota.foto) {
+          this.mascotaImagen = this.mascota.foto
         }
       } catch (error) {
         console.error('Error al obtener el perfil de la mascota:', error)
       }
     },
-    editarMascota() {
-      this.$router.push({ name: 'editar-mascota', params: { id: this.mascota.id_mascota } })
+    toggleEditMode() {
+      this.isEditMode = !this.isEditMode
+    },
+    calcularEdad(fechaNacimiento) {
+      if (!fechaNacimiento) return 'Desconocida'
+
+      const nacimiento = new Date(fechaNacimiento)
+      const diferenciaMs = Date.now() - nacimiento.getTime()
+      const edadDt = new Date(diferenciaMs)
+
+      return Math.abs(edadDt.getUTCFullYear() - 1970)
+    },
+    async guardarCambios() {
+      try {
+        const mascotaId = this.mascota.id_mascota
+        await axios.put(`http://127.0.0.1:5000/mascota/update/${mascotaId}`, this.mascota)
+
+        this.isEditMode = false // Desactivar modo de edición tras guardar
+
+        // Alerta de éxito con SweetAlert2
+        Swal.fire({
+          title: 'Cambios guardados',
+          text: 'La información de la mascota ha sido actualizada exitosamente.',
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#9d8189'
+        })
+      } catch (error) {
+        console.error('Error al actualizar la mascota:', error)
+
+        // Alerta de error con SweetAlert2
+        Swal.fire({
+          title: 'Error',
+          text: 'Hubo un error al actualizar la mascota. Por favor, inténtalo nuevamente.',
+          icon: 'error',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#db7f67'
+        })
+      }
     }
   },
   mounted() {
@@ -75,7 +144,7 @@ export default {
 </script>
 
 <style scoped>
-/* Contenedor de la tarjeta */
+/* Estilos conservados */
 .perfil-mascota-container {
   display: flex;
   justify-content: center;
@@ -97,14 +166,21 @@ export default {
 
 .mascota-card {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   background-color: #ffcad4;
-  padding: 40px;
   border-radius: 20px;
   width: 100%;
-  position: relative;
-  gap: 30px;
+  padding: 20px;
   box-sizing: border-box;
+}
+
+.mascota-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0px 60px 50px 60px;
 }
 
 .mascota-img-container {
@@ -115,6 +191,20 @@ export default {
   width: 200px;
   height: 200px;
   border-radius: 50%;
+  box-shadow: 0 6px 10px -6px black;
+}
+
+h2 {
+  color: #964b09;
+  font-size: 2.8rem;
+  margin: 16px 0px 10px 0px;
+}
+
+.flex-row-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .mascota-info {
@@ -122,38 +212,57 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  padding-top: 20px;
 }
 
-.mascota-info h2 {
-  font-size: 2.5rem;
+.mascota-info label {
+  font-size: 1.4rem;
   font-weight: bold;
-  color: #9d8189;
-  margin-bottom: 10px;
+  color: #964b09;
 }
 
-.mascota-info p {
-  background-color: #ffe5d9;
-  border-radius: 20px;
-  padding: 10px 15px;
-  font-size: 18px;
+.mascota-info .input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.mascota-info input,
+.mascota-info textarea {
+  width: 70%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid #db7f67;
+  font-size: 1.2rem;
+  margin-top: 5px;
   color: #7a5169;
+  background-color: #ffe5d9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #9d8189;
+  box-shadow: 0 0 5px rgba(157, 129, 137, 0.8);
+}
+
+textarea {
+  height: 80px;
 }
 
 .editar-btn {
   background-color: #ffe5d9;
   border: none;
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 30px;
+  right: 30px;
 }
 
 .editar-btn i {
@@ -166,7 +275,17 @@ export default {
   color: white;
 }
 
-/* Animación del borde */
+.footer {
+  background-color: #9d8189;
+  padding: 20px;
+  text-align: center;
+  color: white;
+}
+
+.footer-content {
+  font-size: 14px;
+}
+
 @keyframes steam {
   0% {
     background-position: 0 0;
@@ -177,17 +296,5 @@ export default {
   100% {
     background-position: 0 0;
   }
-}
-
-/* Footer */
-.footer {
-  background-color: #9d8189;
-  padding: 20px;
-  text-align: center;
-  color: white;
-}
-
-.footer-content {
-  font-size: 14px;
 }
 </style>
