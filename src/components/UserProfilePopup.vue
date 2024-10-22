@@ -48,40 +48,47 @@
 </template>
 
 <script>
+import axios from 'axios'; 
 
 export default {
   name: 'UserProfilePopup',
+
   data() {
     return {
       user: {
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '123-456-7890'
+        name: '',
+        email: '',
+        phone: ''
       }
-    }
+    };
+  },
+  mounted() {
+    this.fetchUserData(); 
   },
   methods: {
+  async fetchUserData() {
+      try {
+        const usuarioId = localStorage.getItem('Usuario_id_usuario'); // Obtener el ID del usuario desde localStorage
+        if (!usuarioId) {
+          throw new Error('No se encontró el ID del usuario en localStorage');
+        }
+
+        const response = await axios.get(`http://127.0.0.1:5000/usuario/${usuarioId}`);
+        this.user = {
+          name: response.data.nombre,
+          email: response.data.email,
+          phone: response.data.telefono || 'No disponible'
+        };
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario:', error);
+      }
+    },
     closePopup() {
       this.$emit('close') // Emite un evento para cerrar el popup
     },
     editProfile() {
       this.$emit('edit-profile') // Emitir evento para abrir el popup de edición
     },
-
-
-   
-  
-
-
-
-
-
-
-
-
-
-
-
   }
 }
 </script>
