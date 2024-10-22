@@ -5,7 +5,7 @@
         <div class="color-bar"></div>
         <button class="close-btn" @click="closePopup">×</button>
         <h2>Editar Perfil</h2>
-        <form @submit.prevent="saveProfile">
+        <form @submit.prevent="updateUser">
           <div class="form-group">
             <label for="name">Nombre:</label>
             <input type="text" id="name" v-model="user.name" />
@@ -13,19 +13,38 @@
 
           <div class="form-group">
             <label for="email">Correo:</label>
-            <input type="email" id="email" v-model="user.email" />
+            <input type="email" id="email" v-model="user.email" disabled />
           </div>
 
           <div class="form-group">
             <label for="phone">Teléfono:</label>
             <input type="text" id="phone" v-model="user.phone" />
           </div>
-
           <div class="button-group">
             <button class="btn-save" type="submit">Guardar</button>
             <button class="btn-cancel" type="button" @click="closePopup">Cancelar</button>
           </div>
         </form>
+
+        <!-- Formulario para cambiar la contraseña -->
+
+        <!--
+          <form @submit.prevent="changePassword">
+            <div class="form-group">
+              <label for="currentPassword">Contraseña Actual:</label>
+              <input type="password" id="currentPassword" v-model="passwords.currentPassword" />
+            </div>
+
+            <div class="form-group">
+              <label for="newPassword">Nueva Contraseña:</label>
+              <input type="password" id="newPassword" v-model="passwords.newPassword" />
+            </div>
+
+            <div class="button-group">
+              <button class="btn-save" type="submit">Cambiar Contraseña</button>
+            </div>
+          </form>-->
+
         <div class="footer-image">
           <img src="@/components/images/paws_icon.png" alt="Cat paws" />
         </div>
@@ -35,14 +54,29 @@
 </template>
 
 <script>
+import axios from 'axios'
+import Swal from 'sweetalert2'
+
 export default {
   name: 'EditProfilePopup',
+
+  props: {
+    isVisible: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   data() {
     return {
       user: {
         name: '',
         email: '',
         phone: ''
+      },
+      passwords: {
+        currentPassword: '',
+        newPassword: ''
       }
     }
   },
@@ -53,12 +87,99 @@ export default {
     saveProfile() {
       console.log('Perfil guardado:', this.user)
       this.closePopup()
+    },
+    async fetchUserData() {
+      try {
+        const userId = localStorage.getItem('Usuario_id_usuario')
+
+        const response = await axios.get(`http://127.0.0.1:5000/usuario/${userId}`)
+        this.user = {
+          name: response.data.nombre,
+          email: response.data.email,
+          phone: response.data.telefono || 'No disponible'
+        }
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario:', error)
+      }
+    },
+    async updateUser() {
+      console.log('updateUser fue llamado')
+
+      console.log(`Datos enviados: Nombre - ${this.user.name}, Teléfono - ${this.user.phone}`)
+
+      try {
+        const userId = localStorage.getItem('Usuario_id_usuario') // Obtener el ID del usuario desde localStorage
+
+        const response = await axios.put(`http://127.0.0.1:5000/usuario/${userId}`, {
+          nombre: this.user.name,
+          telefono: this.user.phone
+        })
+
+        console.log('Usuario actualizado:', response.data)
+
+        // Actualizar la información del usuario en el localStorage
+        localStorage.setItem('nombre', this.user.name)
+        localStorage.setItem('telefono', this.user.phone)
+
+        // Emitir un evento hacia el componente padre para notificar los cambios
+        this.$emit('perfilActualizado', { nombre: this.user.name })
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Usuario actualizado',
+          text: 'El usuario ha sido actualizado correctamente',
+          showConfirmButton: false,
+          timer: 1500
+        })
+
+        this.closePopup() // Cerrar el popup después de actualizar
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en la actualización',
+          text: 'No se pudo actualizar el usuario. Verifica los datos e intenta nuevamente',
+          showConfirmButton: true
+        })
+      }
+    },
+
+    //Para cambiar el password
+    async changePassword() {
+      console.log('changePassword fue llamado')
+      console.log(
+        `Contraseña actual: ${this.passwords.currentPassword}, Nueva contraseña: ${this.passwords.newPassword}`
+      )
+
+      try {
+        // Enviar la solicitud PUT al servidor para cambiar la contraseña del usuario con el ID 1 para pruebas
+        const response = await axios.put(`http://127.0.0.1:5000/usuario/cambiar/${1}`, {
+          contrasenia_actual: this.passwords.currentPassword,
+          nueva_contrasenia: this.passwords.newPassword
+        })
+
+        console.log('Contraseña actualizada:', response.data)
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Contraseña actualizada',
+          text: 'La contraseña ha sido actualizada correctamente',
+          showConfirmButton: false,
+          timer: 1500
+        })
+
+        this.closePopup() // Cerrar el popup después de actualizar si es necesario
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en la actualización',
+          text: 'No se pudo actualizar la contraseña. Verifica los datos e intenta nuevamente',
+          showConfirmButton: true
+        })
+      }
     }
   },
   mounted() {
-    this.user.name = 'Nombre Ejemplo'
-    this.user.email = 'correo@ejemplo.com'
-    this.user.phone = '123-456-7890'
+    this.fetchUserData()
   }
 }
 </script>

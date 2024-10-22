@@ -9,7 +9,8 @@
       <div class="hero-content">
         <h1 id="typing-effect"></h1>
 
-        <button class="hero-button">Registra tu mascota</button>
+        <!-- Botón Registra tu mascota -->
+        <button class="hero-button" @click="handleRedirection">Registra tu mascota</button>
       </div>
       <div class="hero-image">
         <img src="@/components/images/logo_encabezado.png" alt="Cute Cat" />
@@ -33,7 +34,7 @@
                 médica o una fecha importante de vacunación.</a
               >
             </li>
-            <button class="btn btn-outline">Ir</button>
+            <button class="btn btn-outline" @click="handleRedirection">Ir</button>
           </ul>
         </li>
 
@@ -50,7 +51,7 @@
                 para que tu mascota reciba el cuidado y la atención que necesita durante el día.</a
               >
             </li>
-            <button class="btn btn-outline">Ir</button>
+            <button class="btn btn-outline" @click="handleRedirection">Ir</button>
           </ul>
         </li>
 
@@ -67,7 +68,7 @@
                 detallado de todos los eventos relacionados con el cuidado de tu mascota.</a
               >
             </li>
-            <button class="btn btn-outline">Ir</button>
+            <button class="btn btn-outline" @click="handleRedirection">Ir</button>
           </ul>
         </li>
         <li class="card-large card-light" id="sup-fish">
@@ -84,7 +85,7 @@
                 diarios hasta revisiones médicas.</a
               >
             </li>
-            <button class="btn btn-outline">Ir</button>
+            <button class="btn btn-outline" @click="handleRedirection">Ir</button>
           </ul>
         </li>
       </ul>
@@ -111,11 +112,17 @@
 
 <script>
 import Navbar from '@/components/Navbar.vue'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'inicio',
   components: {
     Navbar
+  },
+  data() {
+    return {
+      isLoginPopupVisible: false // Controla la visibilidad del popup de login
+    }
   },
   mounted() {
     const text = `Organización total para el\n bienestar de tus mascotas!`
@@ -126,13 +133,28 @@ export default {
       const element = document.getElementById(elementId)
       let index = 0
       const typingInterval = setInterval(() => {
-        // Reemplaza los saltos de línea con <br/>
         element.innerHTML += text.charAt(index) === '\n' ? '<br/>' : text.charAt(index)
         index++
         if (index === text.length) {
           clearInterval(typingInterval)
         }
       }, speed)
+    },
+    handleRedirection() {
+      const usuarioId = localStorage.getItem('Usuario_id_usuario')
+      if (usuarioId) {
+        // Usuario logueado, redirigir al panel de usuario
+        this.$router.push({ name: 'panel-usuario' })
+      } else {
+        // Usuario no logueado, mostrar alerta de que debe iniciar sesión
+        Swal.fire({
+          icon: 'warning',
+          title: 'Inicia sesión',
+          text: 'Debes iniciar sesión para acceder a esta funcionalidad.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#db7f67'
+        })
+      }
     }
   }
 }

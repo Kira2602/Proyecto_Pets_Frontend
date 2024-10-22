@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import PaginaInicio from '@/views/PaginaInicio.vue'
 import PanelUsuario from '@/views/PanelUsuario.vue'
+import MisMascotas from '@/views/MisMascotas.vue'
+import PerfilMascota from '@/views/PerfilMascota.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +16,16 @@ const router = createRouter({
       path: '/panel-usuario',
       name: 'panel-usuario',
       component: PanelUsuario
+    },
+    {
+      path: '/mis-mascotas',
+      name: 'mis-mascotas',
+      component: MisMascotas
+    },
+    {
+      path: '/perfil-mascota/:id',
+      name: 'perfil-mascota',
+      component: PerfilMascota
     }
   ]
 })
