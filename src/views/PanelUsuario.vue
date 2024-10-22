@@ -1,7 +1,7 @@
 <template>
   <div>
     <header>
-      <Navbar />
+      <Navbar :nombre="nombreUsuario" />
     </header>
 
     <!-- Panel de Usuario -->
@@ -113,7 +113,11 @@
     />
 
     <!-- Popup de edición de perfil -->
-    <EditProfilePopup v-if="isEditProfilePopupVisible" @close="isEditProfilePopupVisible = false" />
+    <EditProfilePopup
+      v-if="isEditProfilePopupVisible"
+      @close="isEditProfilePopupVisible = false"
+      @perfilActualizado="actualizarNombreUsuario"
+    />
 
     <RegisterPetPopup v-if="isRegisterPetPopupVisible" @close="isRegisterPetPopupVisible = false" />
   </div>
@@ -138,7 +142,8 @@ export default {
       isProfilePopupVisible: false, // Controla la visibilidad del popup de perfil
       isEditProfilePopupVisible: false, // Controla la visibilidad del popup de edición
       isRegisterPetPopupVisible: false, // Controla la visibilidad del popup de perfil
-      usuarioId: null // ID del usuario almacenado
+      usuarioId: null, // ID del usuario almacenado
+      nombreUsuario: localStorage.getItem('nombre') || '' // Inicializar con el nombre almacenado
     }
   },
   methods: {
@@ -161,6 +166,9 @@ export default {
     redirectToMisMascotas() {
       // Redirigir a la vista de mis-mascotas
       this.$router.push({ name: 'mis-mascotas' })
+    },
+    actualizarNombreUsuario(datos) {
+      this.nombreUsuario = datos.nombre // Actualizar el nombre del usuario después de editarlo
     }
   },
   mounted() {

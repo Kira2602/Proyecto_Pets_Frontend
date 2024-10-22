@@ -14,7 +14,8 @@
         <i class="fas fa-bell"></i>
         <div class="user-profile" @click="toggleDropdown">
           <i class="fas fa-user-circle"></i>
-          <span>{{ username }}</span>
+          <span>{{ nombreUsuario }}</span>
+          <!-- Nombre dinámico -->
         </div>
 
         <!-- Menú desplegable para cerrar sesión -->
@@ -53,7 +54,8 @@
         <i class="fas fa-bell"></i>
         <div class="user-profile" @click="toggleDropdown">
           <i class="fas fa-user-circle"></i>
-          <span>{{ username }}</span>
+          <span>{{ nombreUsuario }}</span>
+          <!-- Nombre dinámico del usuario -->
         </div>
 
         <!-- Menú desplegable para cerrar sesión -->
@@ -108,15 +110,21 @@ export default {
     LoginPopup,
     RegisterPopup
   },
+  props: {
+    nombre: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       isAuthenticated: false,
-      username: '',
+      nombreUsuario: this.nombre, // Nombre dinámico inicializado desde props
       showLoginPopupVisible: false,
       showRegisterPopupVisible: false,
       dropdownOpen: false,
       isOnInicio: false,
-      isOnMisMascotas: false // Variable para controlar si estamos en "mis-mascotas"
+      isOnMisMascotas: false
     }
   },
   mounted() {
@@ -127,6 +135,9 @@ export default {
     '$route.name'() {
       this.checkAuthentication()
       this.checkRoute()
+    },
+    nombre(newNombre) {
+      this.nombreUsuario = newNombre // Actualiza el nombre dinámico al cambiar la prop
     }
   },
   methods: {
@@ -134,10 +145,10 @@ export default {
       const token = localStorage.getItem('authToken')
       if (token) {
         this.isAuthenticated = true
-        this.username = localStorage.getItem('nombre')
+        this.nombreUsuario = localStorage.getItem('nombre') || this.nombreUsuario
       } else {
         this.isAuthenticated = false
-        this.username = ''
+        this.nombreUsuario = ''
       }
     },
     checkRoute() {
@@ -205,7 +216,6 @@ export default {
       this.$router.push({ name: 'panel-usuario' })
     },
     goBack() {
-      // Ir a la página anterior o al panel de usuario
       this.$router.go(-1)
     }
   }

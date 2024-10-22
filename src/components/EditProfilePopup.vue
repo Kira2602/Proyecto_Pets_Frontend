@@ -64,8 +64,7 @@ export default {
     isVisible: {
       type: Boolean,
       default: false
-    },
-    
+    }
   },
 
   data() {
@@ -73,7 +72,7 @@ export default {
       user: {
         name: '',
         email: '',
-        phone: '',
+        phone: ''
       },
       passwords: {
         currentPassword: '',
@@ -91,16 +90,16 @@ export default {
     },
     async fetchUserData() {
       try {
-        const userId = localStorage.getItem('Usuario_id_usuario'); 
+        const userId = localStorage.getItem('Usuario_id_usuario')
 
-        const response = await axios.get(`http://127.0.0.1:5000/usuario/${userId}`);
+        const response = await axios.get(`http://127.0.0.1:5000/usuario/${userId}`)
         this.user = {
           name: response.data.nombre,
           email: response.data.email,
           phone: response.data.telefono || 'No disponible'
-        };
+        }
       } catch (error) {
-        console.error('Error al obtener los datos del usuario:', error);
+        console.error('Error al obtener los datos del usuario:', error)
       }
     },
     async updateUser() {
@@ -109,14 +108,21 @@ export default {
       console.log(`Datos enviados: Nombre - ${this.user.name}, Teléfono - ${this.user.phone}`)
 
       try {
-        // Enviar la solicitud PUT al servidor para actualizar el usuario con el ID 1 para pruebas
+        const userId = localStorage.getItem('Usuario_id_usuario') // Obtener el ID del usuario desde localStorage
 
-        const response = await axios.put(`http://127.0.0.1:5000/usuario/${1}`, {
+        const response = await axios.put(`http://127.0.0.1:5000/usuario/${userId}`, {
           nombre: this.user.name,
           telefono: this.user.phone
         })
 
         console.log('Usuario actualizado:', response.data)
+
+        // Actualizar la información del usuario en el localStorage
+        localStorage.setItem('nombre', this.user.name)
+        localStorage.setItem('telefono', this.user.phone)
+
+        // Emitir un evento hacia el componente padre para notificar los cambios
+        this.$emit('perfilActualizado', { nombre: this.user.name })
 
         Swal.fire({
           icon: 'success',
@@ -173,7 +179,7 @@ export default {
     }
   },
   mounted() {
-    this.fetchUserData(); 
+    this.fetchUserData()
   }
 }
 </script>
