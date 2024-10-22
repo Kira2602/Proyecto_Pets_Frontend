@@ -5,8 +5,29 @@
       <img src="@/components/images/nav_bar_logo.png" alt="Logo" class="logo-img" />
     </div>
 
+    <!-- Mostrar botón "Volver", notificaciones, y perfil en "mis-mascotas" -->
+    <div v-if="isOnMisMascotas" class="menu-desktop">
+      <button class="btn btn-outline" @click="goBack">Volver</button>
+
+      <!-- Notificaciones y Perfil del Usuario -->
+      <div class="user-info">
+        <i class="fas fa-bell"></i>
+        <div class="user-profile" @click="toggleDropdown">
+          <i class="fas fa-user-circle"></i>
+          <span>{{ username }}</span>
+        </div>
+
+        <!-- Menú desplegable para cerrar sesión -->
+        <div v-if="dropdownOpen" class="dropdown-menu">
+          <ul>
+            <li @click="confirmLogout">Cerrar sesión</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- Menú para cuando el usuario NO ha iniciado sesión -->
-    <div v-if="!isAuthenticated" class="menu-desktop">
+    <div v-else-if="!isAuthenticated" class="menu-desktop">
       <ul class="menu">
         <li><a href="#encabezado" class="menu-link">Inicio</a></li>
         <li><a href="#funcionalidades" class="menu-link">Funcionalidades</a></li>
@@ -94,7 +115,8 @@ export default {
       showLoginPopupVisible: false,
       showRegisterPopupVisible: false,
       dropdownOpen: false,
-      isOnInicio: false
+      isOnInicio: false,
+      isOnMisMascotas: false // Variable para controlar si estamos en "mis-mascotas"
     }
   },
   mounted() {
@@ -121,6 +143,7 @@ export default {
     checkRoute() {
       // Actualizar isOnInicio dependiendo de la ruta
       this.isOnInicio = this.$route.name === 'inicio'
+      this.isOnMisMascotas = this.$route.name === 'mis-mascotas'
     },
     showLoginPopup() {
       this.showLoginPopupVisible = true
@@ -180,6 +203,10 @@ export default {
     },
     redirectToPanel() {
       this.$router.push({ name: 'panel-usuario' })
+    },
+    goBack() {
+      // Ir a la página anterior o al panel de usuario
+      this.$router.go(-1)
     }
   }
 }
@@ -256,6 +283,7 @@ li {
   background-color: transparent;
   color: #db7f67;
   border: 2px solid #db7f67;
+  margin-right: 20px;
 }
 
 .btn-outline:hover {
