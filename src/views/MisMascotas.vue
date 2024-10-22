@@ -29,9 +29,11 @@
         </div>
       </div>
 
+      <!-- Registrar Mascota Popup -->
       <RegisterPetPopup
         v-if="isRegisterPetPopupVisible"
         @close="isRegisterPetPopupVisible = false"
+        @mascota-registrada="agregarMascota"
       />
     </section>
 
@@ -54,6 +56,7 @@ import conejoIcon from '@/components/images/conejo.png'
 import hamsterIcon from '@/components/images/hamster.png'
 import defaultIcon from '@/components/images/paw.png'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'MisMascotas',
@@ -68,6 +71,7 @@ export default {
     }
   },
   methods: {
+    // Obtener las mascotas desde el backend
     async obtenerMascotas() {
       const usuarioId = localStorage.getItem('Usuario_id_usuario')
       if (!usuarioId) {
@@ -82,9 +86,16 @@ export default {
         this.mascotas = response.data
       } catch (error) {
         console.error('Error al obtener mascotas:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al obtener las mascotas',
+          confirmButtonColor: '#9d8189'
+        })
       }
     },
-    // Usa las imágenes importadas directamente
+
+    // Obtener el icono de la especie según el ID
     getEspecieIcon(especieId) {
       switch (especieId) {
         case 1:
@@ -101,11 +112,26 @@ export default {
           return defaultIcon
       }
     },
+
+    // Ver perfil de la mascota
     verPerfil(mascotaId) {
       this.$router.push({ name: 'perfil-mascota', params: { id: mascotaId } })
     },
+
+    // Abrir popup para registrar nueva mascota
     openRegisterPetPopup() {
       this.isRegisterPetPopupVisible = true
+    },
+
+    // Agregar una nueva mascota a la lista cuando se registre
+    agregarMascota(nuevaMascota) {
+      this.mascotas.push(nuevaMascota)
+      Swal.fire({
+        icon: 'success',
+        title: 'Mascota Registrada',
+        text: 'La mascota ha sido registrada correctamente.',
+        confirmButtonColor: '#9d8189'
+      })
     }
   },
   mounted() {
