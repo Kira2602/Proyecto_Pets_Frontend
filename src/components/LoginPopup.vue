@@ -68,16 +68,16 @@ export default {
         const response = await axios.post('http://127.0.0.1:5000/usuario/login', {
           email: this.email,
           contrasenia: this.password
-        });
-        console.log('Respuesta de login:', response.data);
+        })
+        console.log('Respuesta de login:', response.data)
 
         // Almacenar el ID del usuario en localStorage
         if (response.data.id_usuario) {
-          localStorage.setItem('Usuario_id_usuario', response.data.id_usuario);
+          localStorage.setItem('Usuario_id_usuario', response.data.id_usuario)
         } else {
-          console.error('No se recibió id_usuario en la respuesta');
-          alert('No se pudo obtener el ID del usuario.');
-          return;
+          console.error('No se recibió id_usuario en la respuesta')
+          alert('No se pudo obtener el ID del usuario.')
+          return
         }
 
         if (response.data.token && response.data.nombre) {
