@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import PaginaInicio from '@/views/PaginaInicio.vue'
 import PanelUsuario from '@/views/PanelUsuario.vue'
+import MisMascotas from '@/views/MisMascotas.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +15,11 @@ const router = createRouter({
       path: '/panel-usuario',
       name: 'panel-usuario',
       component: PanelUsuario
+    },
+    {
+      path: '/mis-mascotas',
+      name: 'mis-mascotas',
+      component: MisMascotas
     }
   ]
 })
