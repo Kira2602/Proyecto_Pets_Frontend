@@ -6,7 +6,7 @@
     </div>
 
     <!-- Mostrar botón "Volver", notificaciones, y perfil en "mis-mascotas" -->
-    <div v-if="isOnMisMascotas" class="menu-desktop">
+    <div v-if="isOnMisMascotas || isOnPerfilMascota" class="menu-desktop">
       <button class="btn btn-outline" @click="goBack">Volver</button>
 
       <!-- Notificaciones y Perfil del Usuario -->
@@ -155,6 +155,7 @@ export default {
       // Actualizar isOnInicio dependiendo de la ruta
       this.isOnInicio = this.$route.name === 'inicio'
       this.isOnMisMascotas = this.$route.name === 'mis-mascotas'
+      this.isOnPerfilMascota = this.$route.name === 'perfil-mascota'
     },
     showLoginPopup() {
       this.showLoginPopupVisible = true

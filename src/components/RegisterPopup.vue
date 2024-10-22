@@ -10,13 +10,37 @@
           <h2>Registrarse</h2>
           <form @submit.prevent="register">
             <label for="name">Nombre</label>
-            <input type="text" v-model="nombre" id="name" placeholder="Nombre" />
+            <input
+              type="text"
+              v-model="nombre"
+              id="name"
+              placeholder="Nombre"
+              @blur="validateField('nombre')"
+              :class="{ 'error-border': errors.nombre }"
+            />
+            <span v-if="errors.nombre" class="error-message">{{ errors.nombre }}</span>
 
             <label for="phone">Teléfono</label>
-            <input type="text" v-model="telefono" id="phone" placeholder="Teléfono" />
+            <input
+              type="text"
+              v-model="telefono"
+              id="phone"
+              placeholder="Teléfono"
+              @blur="validateField('telefono')"
+              :class="{ 'error-border': errors.telefono }"
+            />
+            <span v-if="errors.telefono" class="error-message">{{ errors.telefono }}</span>
 
             <label for="email">Email</label>
-            <input type="email" v-model="email" id="email" placeholder="Email" />
+            <input
+              type="email"
+              v-model="email"
+              id="email"
+              placeholder="Email"
+              @blur="validateField('email')"
+              :class="{ 'error-border': errors.email }"
+            />
+            <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
 
             <label for="password">Contraseña</label>
             <div class="password-wrapper">
@@ -25,11 +49,14 @@
                 v-model="contrasenia"
                 id="password"
                 placeholder="Contraseña"
+                @blur="validateField('contrasenia')"
+                :class="{ 'error-border': errors.contrasenia }"
               />
               <span class="toggle-password" @click="togglePasswordVisibility">
                 <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
               </span>
             </div>
+            <span v-if="errors.contrasenia" class="error-message">{{ errors.contrasenia }}</span>
 
             <button type="submit" class="btn-register">Registrarse</button>
           </form>
@@ -57,7 +84,13 @@ export default {
       telefono: '',
       email: '',
       contrasenia: '',
-      showPassword: false
+      showPassword: false,
+      errors: {
+        nombre: '',
+        telefono: '',
+        email: '',
+        contrasenia: ''
+      }
     }
   },
   methods: {
@@ -67,7 +100,49 @@ export default {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword
     },
+    validateField(field) {
+      this.errors[field] = ''
+
+      // Validaciones específicas para cada campo
+      if (field === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!this.email || !emailRegex.test(this.email)) {
+          this.errors.email = 'Introduce un correo electrónico válido'
+        }
+      } else if (field === 'telefono') {
+        const phoneRegex = /^[0-9]+$/
+        if (!this.telefono || !phoneRegex.test(this.telefono)) {
+          this.errors.telefono = 'Introduce un número de teléfono válido'
+        }
+      } else if (field === 'contrasenia') {
+        if (this.contrasenia.length < 6) {
+          this.errors.contrasenia = 'La contraseña debe tener al menos 6 caracteres'
+        }
+      } else {
+        if (!this[field]) {
+          this.errors[field] = `El campo ${field} no puede estar vacío`
+        }
+      }
+    },
+    validateForm() {
+      // Validar todos los campos
+      this.validateField('nombre')
+      this.validateField('telefono')
+      this.validateField('email')
+      this.validateField('contrasenia')
+
+      return (
+        !this.errors.nombre &&
+        !this.errors.telefono &&
+        !this.errors.email &&
+        !this.errors.contrasenia
+      )
+    },
     async register() {
+      if (!this.validateForm()) {
+        return
+      }
+
       try {
         const response = await axios.post('http://127.0.0.1:5000/usuario/create', {
           nombre: this.nombre,
@@ -203,6 +278,16 @@ export default {
   cursor: pointer;
   font-size: 1.2rem;
   color: #af8a8a;
+}
+
+.error-border {
+  border-color: red;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .btn-register {
