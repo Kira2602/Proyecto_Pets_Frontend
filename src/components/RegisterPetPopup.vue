@@ -20,8 +20,10 @@
                 type="text"
                 id="nombre"
                 v-model="petData.nombre"
-                required
+                @blur="validateField('nombre')"
+                :class="{ 'error-border': errors.nombre }"
               />
+              <span v-if="errors.nombre" class="error-message">{{ errors.nombre }}</span>
             </div>
             <div class="form-group">
               <label for="birthdate">Fecha de nacimiento:</label>
@@ -30,8 +32,12 @@
                 type="date"
                 id="birthdate"
                 v-model="petData.fecha_nacimiento"
-                required
+                @blur="validateField('fecha_nacimiento')"
+                :class="{ 'error-border': errors.fecha_nacimiento }"
               />
+              <span v-if="errors.fecha_nacimiento" class="error-message">{{
+                errors.fecha_nacimiento
+              }}</span>
             </div>
             <div class="form-group">
               <label for="especie">Especie:</label>
@@ -39,7 +45,8 @@
                 class="static-data"
                 id="especie"
                 v-model="petData.especie_id_especie"
-                required
+                @blur="validateField('especie_id_especie')"
+                :class="{ 'error-border': errors.especie_id_especie }"
               >
                 <option disabled value="">Selecciona una especie</option>
                 <option
@@ -50,6 +57,9 @@
                   {{ especie.especie }}
                 </option>
               </select>
+              <span v-if="errors.especie_id_especie" class="error-message">{{
+                errors.especie_id_especie
+              }}</span>
             </div>
             <div class="form-group sexo-group">
               <div class="sexo-options">
@@ -62,6 +72,7 @@
                   Macho
                 </label>
               </div>
+              <span v-if="errors.sexo" class="error-message">{{ errors.sexo }}</span>
             </div>
             <div class="button-group">
               <button class="btn-edit" type="submit">Siguiente</button>
@@ -123,12 +134,35 @@ export default {
         especie_id_especie: '',
         Usuario_id_usuario: ''
       },
-      especies: []
+      especies: [],
+      errors: {
+        nombre: '',
+        fecha_nacimiento: '',
+        especie_id_especie: '',
+        sexo: ''
+      }
     }
   },
   methods: {
+    validateField(field) {
+      this.errors[field] = ''
+
+      if (!this.petData[field]) {
+        this.errors[field] = `El campo ${field} no puede estar vacío`
+      }
+    },
     goToStep2() {
-      if (this.petData.nombre && this.petData.fecha_nacimiento) {
+      this.validateField('nombre')
+      this.validateField('fecha_nacimiento')
+      this.validateField('especie_id_especie')
+      this.validateField('sexo')
+
+      if (
+        !this.errors.nombre &&
+        !this.errors.fecha_nacimiento &&
+        !this.errors.especie_id_especie &&
+        !this.errors.sexo
+      ) {
         this.step = 2
       } else {
         Swal.fire({
@@ -179,7 +213,6 @@ export default {
           }
         })
     },
-
     closePopup() {
       this.$emit('close')
     },
@@ -265,7 +298,6 @@ export default {
   max-height: 90vh;
   box-shadow: 0 0 40px -10px rgba(0, 0, 0, 0.2);
   position: relative;
-  /* overflow: hidden; */
   overflow-y: auto;
 }
 
@@ -363,6 +395,16 @@ h2 {
   box-sizing: border-box;
 }
 
+.error-border {
+  border-color: red;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
 .button-group {
   display: flex;
   justify-content: center;
@@ -397,6 +439,7 @@ button.btn-edit:hover {
   align-items: center;
   margin-bottom: 20px;
 }
+
 .sexo-options {
   display: flex;
   justify-content: space-between;
