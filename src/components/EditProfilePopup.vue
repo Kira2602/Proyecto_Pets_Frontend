@@ -13,7 +13,7 @@
 
           <div class="form-group">
             <label for="email">Correo:</label>
-            <input type="email" id="email" v-model="user.email" />
+            <input type="email" id="email" v-model="user.email" disabled />
           </div>
 
           <div class="form-group">
@@ -65,10 +65,7 @@ export default {
       type: Boolean,
       default: false
     },
-    userId: {
-      type: Number,
-      default: 1 // id de usuario por defecto para pruebas
-    }
+    
   },
 
   data() {
@@ -77,7 +74,6 @@ export default {
         name: '',
         email: '',
         phone: '',
-        showPassword: false
       },
       passwords: {
         currentPassword: '',
@@ -92,6 +88,20 @@ export default {
     saveProfile() {
       console.log('Perfil guardado:', this.user)
       this.closePopup()
+    },
+    async fetchUserData() {
+      try {
+        const userId = localStorage.getItem('Usuario_id_usuario'); 
+
+        const response = await axios.get(`http://127.0.0.1:5000/usuario/${userId}`);
+        this.user = {
+          name: response.data.nombre,
+          email: response.data.email,
+          phone: response.data.telefono || 'No disponible'
+        };
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario:', error);
+      }
     },
     async updateUser() {
       console.log('updateUser fue llamado')
@@ -163,9 +173,7 @@ export default {
     }
   },
   mounted() {
-    this.user.name = 'Nombre Ejemplo'
-    this.user.email = 'correo@ejemplo.com'
-    this.user.phone = '1257890'
+    this.fetchUserData(); 
   }
 }
 </script>
