@@ -47,3 +47,7 @@ npm install axios
 npm install sweetalert2
 
 ```
+### Extension de lottiefile
+```sh
+npm install lottie-web
+```

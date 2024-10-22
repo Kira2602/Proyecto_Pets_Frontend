@@ -48,6 +48,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'UserProfilePopup',
   data() {
@@ -65,7 +66,22 @@ export default {
     },
     editProfile() {
       this.$emit('edit-profile') // Emitir evento para abrir el popup de edición
-    }
+    },
+
+
+   
+  
+
+
+
+
+
+
+
+
+
+
+
   }
 }
 </script>
