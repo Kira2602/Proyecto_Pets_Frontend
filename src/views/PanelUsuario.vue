@@ -56,7 +56,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="openMedicalAppointmentPopup">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/gestion_citas_medicas_icon.png" alt="Citas médicas" />
@@ -64,6 +64,7 @@
             </div>
           </div>
         </div>
+
         <div class="icon-card">
           <div class="animated-border">
             <div class="inner-card">
@@ -118,8 +119,14 @@
       @close="isEditProfilePopupVisible = false"
       @perfilActualizado="actualizarNombreUsuario"
     />
-
+    <!-- Popup de registrar mascota -->
     <RegisterPetPopup v-if="isRegisterPetPopupVisible" @close="isRegisterPetPopupVisible = false" />
+
+    <!-- Popup de registrar cita medica -->
+    <RegisterMedicalAppointmentPopup
+      v-if="isMedicalAppointmentPopupVisible"
+      @close="isMedicalAppointmentPopupVisible = false"
+    />
   </div>
 </template>
 
@@ -128,6 +135,7 @@ import Navbar from '@/components/Navbar.vue'
 import UserProfilePopup from '@/components/UserProfilePopup.vue'
 import EditProfilePopup from '@/components/EditProfilePopup.vue'
 import RegisterPetPopup from '@/components/RegisterPetPopup.vue'
+import RegisterMedicalAppointmentPopup from '@/components/RegisterMedicalAppointmentPopup.vue'
 
 export default {
   name: 'PanelUsuario',
@@ -135,13 +143,15 @@ export default {
     Navbar,
     UserProfilePopup,
     EditProfilePopup,
-    RegisterPetPopup
+    RegisterPetPopup,
+    RegisterMedicalAppointmentPopup
   },
   data() {
     return {
       isProfilePopupVisible: false, // Controla la visibilidad del popup de perfil
       isEditProfilePopupVisible: false, // Controla la visibilidad del popup de edición
       isRegisterPetPopupVisible: false, // Controla la visibilidad del popup de perfil
+      isMedicalAppointmentPopupVisible: false,
       usuarioId: null, // ID del usuario almacenado
       nombreUsuario: localStorage.getItem('nombre') || '' // Inicializar con el nombre almacenado
     }
@@ -162,6 +172,9 @@ export default {
       } else {
         alert('Debes iniciar sesión para registrar una mascota.')
       }
+    },
+    openMedicalAppointmentPopup() {
+      this.isMedicalAppointmentPopupVisible = true
     },
     redirectToMisMascotas() {
       // Redirigir a la vista de mis-mascotas
