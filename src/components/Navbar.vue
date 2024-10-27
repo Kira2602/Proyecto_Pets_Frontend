@@ -6,7 +6,10 @@
     </div>
 
     <!-- Mostrar botón "Volver", notificaciones, y perfil en "mis-mascotas" -->
-    <div v-if="isOnMisMascotas || isOnPerfilMascota" class="menu-desktop">
+    <div
+      v-if="isOnMisMascotas || isOnPerfilMascota || isOnHistorialActividades"
+      class="menu-desktop"
+    >
       <button class="btn btn-outline" @click="goBack">Volver</button>
 
       <!-- Notificaciones y Perfil del Usuario -->
@@ -124,7 +127,8 @@ export default {
       showRegisterPopupVisible: false,
       dropdownOpen: false,
       isOnInicio: false,
-      isOnMisMascotas: false
+      isOnMisMascotas: false,
+      isOnHistorialActividades: false
     }
   },
   mounted() {
@@ -156,6 +160,7 @@ export default {
       this.isOnInicio = this.$route.name === 'inicio'
       this.isOnMisMascotas = this.$route.name === 'mis-mascotas'
       this.isOnPerfilMascota = this.$route.name === 'perfil-mascota'
+      this.isOnHistorialActividades = this.$route.name === 'historial-actividades'
     },
     showLoginPopup() {
       this.showLoginPopupVisible = true
