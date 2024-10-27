@@ -16,7 +16,6 @@
 
           <div class="flex-row-container">
             <div class="mascota-info">
-              <!-- Mostrar input para fecha de nacimiento cuando se edita, y la edad cuando no -->
               <div class="input-group">
                 <label><strong>Nombre:</strong></label>
                 <input type="text" v-model="mascota.nombre" :disabled="!isEditMode" />
@@ -56,6 +55,26 @@
       </div>
     </div>
 
+    <!-- Registro de Salud -->
+    <div class="registro-salud-container">
+      <div class="animated-border">
+        <div class="registro-salud">
+          <h3>Registro de salud</h3>
+          <div class="salud-card" v-for="registro in registrosSalud" :key="registro.id">
+            <h4>{{ registro.tipo }}</h4>
+            <div class="registro-info">
+              <p><strong>Fecha:</strong> {{ registro.fecha }}</p>
+              <p><strong>Observación:</strong> {{ registro.observacion }}</p>
+              <p>
+                <strong>Archivo:</strong>
+                <a :href="registro.archivoUrl" target="_blank">{{ registro.archivo }}</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <footer class="footer">
       <div class="footer-content">
         <p>© 2024 Grupo PetCare. Todos los derechos reservados.</p>
@@ -79,7 +98,17 @@ export default {
     return {
       mascota: {},
       mascotaImagen: defaultMascotaImage,
-      isEditMode: false // Agrega este estado para habilitar/deshabilitar la edición
+      isEditMode: false,
+      registrosSalud: [
+        {
+          id: 1,
+          tipo: 'Vacunas',
+          fecha: '22/09/2024',
+          observacion: 'triple felina',
+          archivo: 'TFelina.pdf',
+          archivoUrl: '/path/to/TFelina.pdf'
+        }
+      ]
     }
   },
   methods: {
@@ -113,9 +142,8 @@ export default {
         const mascotaId = this.mascota.id_mascota
         await axios.put(`http://127.0.0.1:5000/mascota/update/${mascotaId}`, this.mascota)
 
-        this.isEditMode = false // Desactivar modo de edición tras guardar
+        this.isEditMode = false
 
-        // Alerta de éxito con SweetAlert2
         Swal.fire({
           title: 'Cambios guardados',
           text: 'La información de la mascota ha sido actualizada exitosamente.',
@@ -126,7 +154,6 @@ export default {
       } catch (error) {
         console.error('Error al actualizar la mascota:', error)
 
-        // Alerta de error con SweetAlert2
         Swal.fire({
           title: 'Error',
           text: 'Hubo un error al actualizar la mascota. Por favor, inténtalo nuevamente.',
@@ -144,7 +171,8 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos conservados */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
 .perfil-mascota-container {
   display: flex;
   justify-content: center;
@@ -270,9 +298,49 @@ textarea {
   color: #9d8189;
 }
 
-.editar-btn:hover {
-  background-color: #f4a4a4;
-  color: white;
+.registro-salud-container {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.registro-salud {
+  background-color: #d8e2dc;
+  border-radius: 15px;
+  padding: 20px;
+  max-width: 1000px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.registro-salud h3 {
+  color: #9d8189;
+  text-align: center;
+  font-weight: bold;
+  font-family: 'Poppins', sans-serif;
+  font-size: 25px;
+}
+
+.salud-card {
+  background-color: #e7e7e7;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px 0;
+}
+
+.registro-info {
+  background-color: #fff;
+  padding: 10px;
+  color: #9d8189;
+  max-width: 200px;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 8px;
+}
+
+.salud-card h4 {
+  color: #9d8189;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
 }
 
 .footer {
