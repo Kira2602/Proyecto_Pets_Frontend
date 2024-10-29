@@ -55,27 +55,41 @@
 
           <div class="form-group notification-group">
             <label>Agregar notificación:</label>
-            <button type="button" class="notification-btn">🔔</button>
+            <button type="button" class="notification-btn" @click="openNotificationPopup">
+              🔔
+            </button>
           </div>
 
           <button type="submit" class="register-btn">Registrar</button>
         </form>
       </div>
     </div>
+    <!-- Componente de Notificación -->
+    <NotificationPopup
+      v-if="isNotificationPopupVisible"
+      @close="closeNotificationPopup"
+      @saveNotification="handleSaveNotification"
+    />
   </div>
 </template>
 
 <script>
 import lottie from 'lottie-web'
+import NotificationPopup from '@/components/NotificationPopup.vue'
 
 export default {
+  components: {
+    NotificationPopup
+  },
   data() {
     return {
+      isNotificationPopupVisible: false,
       activityData: {
         mascota: '',
         descripcion: '',
         fecha_hora: ''
       },
+      notificationData: {},
       errors: {
         mascota: '',
         descripcion: '',
@@ -103,6 +117,17 @@ export default {
       if (field === 'fecha_hora' && !this.activityData.fecha_hora) {
         this.errors.fecha_hora = 'Por favor selecciona una fecha y hora'
       }
+    },
+    openNotificationPopup() {
+      this.isNotificationPopupVisible = true
+    },
+    closeNotificationPopup() {
+      this.isNotificationPopupVisible = false
+    },
+    handleSaveNotification(notificationData) {
+      this.notificationData = notificationData
+      console.log('Datos de notificación guardados:', notificationData)
+      this.closeNotificationPopup()
     },
     registerActivity() {
       if (!this.errors.mascota && !this.errors.descripcion && !this.errors.fecha_hora) {
