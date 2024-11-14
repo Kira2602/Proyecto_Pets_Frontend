@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="redirectToSalud">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/perro.png" alt="Salud" />
@@ -207,8 +207,10 @@ export default {
       this.isOtherActivityPopupVisible = true
     },
     redirectToMisMascotas() {
-      // Redirigir a la vista de mis-mascotas
       this.$router.push({ name: 'mis-mascotas' })
+    },
+    redirectToSalud() {
+      this.$router.push({ name: 'salud' })
     },
     redirectToHistorialActividades() {
       this.$router.push({ name: 'historial-actividades' })

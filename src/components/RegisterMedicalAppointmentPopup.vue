@@ -19,10 +19,15 @@
               required
             >
               <option disabled value="">Selecciona una mascota</option>
-              <option v-for="mascota in mascotas" :key="mascota.id" :value="mascota.nombre">
+              <option
+                v-for="mascota in mascotas"
+                :key="mascota.id_mascota"
+                :value="mascota.id_mascota"
+              >
                 {{ mascota.nombre }}
               </option>
             </select>
+
             <span v-if="errors.mascota" class="error-message">{{ errors.mascota }}</span>
           </div>
 
@@ -76,6 +81,8 @@
 <script>
 import lottie from 'lottie-web'
 import NotificationPopup from '@/components/NotificationPopup.vue'
+import axios from 'axios'
+import Swal from 'sweetalert2'
 
 export default {
   components: {
@@ -84,6 +91,7 @@ export default {
   data() {
     return {
       isNotificationPopupVisible: false,
+      //usuario_id: 1, // Cambia esto por el ID real del usuario
       appointmentData: {
         mascota: '',
         descripcion: '',
@@ -95,16 +103,66 @@ export default {
         descripcion: '',
         fecha_hora: ''
       },
-      mascotas: [
-        { id: 1, nombre: 'Lulu' },
-        { id: 2, nombre: 'Max' },
-        { id: 3, nombre: 'Bella' }
-      ]
+      mascotas: [] // Inicialmente vacío
     }
   },
   methods: {
-    closePopup() {
-      this.$emit('close')
+    async fetchMascotas() {
+      const usuarioId = localStorage.getItem('Usuario_id_usuario')
+      if (!usuarioId) {
+        this.$router.push('/login')
+        return
+      }
+
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5000/mascota/mis-mascotas?Usuario_id_usuario=${usuarioId}`
+        )
+        this.mascotas = response.data
+      } catch (error) {
+        console.error('Error al obtener mascotas:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al obtener las mascotas',
+          confirmButtonColor: '#9d8189'
+        })
+      }
+    },
+    async registerAppointment() {
+      if (this.validateAllFields()) {
+        try {
+          const response = await axios.post('http://127.0.0.1:5000/actividad/citas', {
+            Mascota_id_mascota: this.appointmentData.mascota,
+            descripcion: this.appointmentData.descripcion,
+            fecha_hora: this.appointmentData.fecha_hora
+          })
+
+          if (response.status === 201) {
+            console.log('Cita médica registrada:', response.data)
+            Swal.fire({
+              icon: 'success',
+              title: 'Cita Registrada',
+              text: 'La cita médica ha sido registrada correctamente.',
+              confirmButtonColor: '#9d8189',
+              customClass: {
+                popup: 'swal-popup'
+              }
+            }),
+              this.closePopup()
+          }
+        } catch (error) {
+          console.error('Error al registrar la cita:', error)
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al registrar la cita médica',
+            confirmButtonColor: '#9d8189'
+          })
+        }
+      } else {
+        console.error('Error en los datos del formulario')
+      }
     },
     validateField(field) {
       this.errors[field] = ''
@@ -137,16 +195,13 @@ export default {
       console.log('Datos de notificación guardados:', notificationData)
       this.closeNotificationPopup()
     },
-    registerAppointment() {
-      if (this.validateAllFields()) {
-        console.log('Datos de la cita médica:', this.appointmentData)
-        this.closePopup()
-      } else {
-        console.error('Error en los datos del formulario')
-      }
+    closePopup() {
+      this.$emit('close')
     }
   },
   mounted() {
+    this.fetchMascotas() // Llama a fetchMascotas cuando el componente se monta
+
     if (this.$refs.lottieContainer) {
       lottie.loadAnimation({
         container: this.$refs.lottieContainer,
@@ -175,7 +230,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 999;
   font-family: 'Poppins', sans-serif;
 }
 
@@ -303,5 +358,9 @@ textarea {
   color: red;
   font-size: 12px;
   margin-top: 4px;
+}
+
+.swal-popup {
+  z-index: 10000 !important;
 }
 </style>
