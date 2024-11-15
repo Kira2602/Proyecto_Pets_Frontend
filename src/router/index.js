@@ -36,9 +36,9 @@ const router = createRouter({
     },
     {
       path: '/salud',
-      name: 'Salud',
+      name: 'salud',
       component: Salud
-    }
+    },
   ]
 })
 
