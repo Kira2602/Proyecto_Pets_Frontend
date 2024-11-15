@@ -11,6 +11,8 @@
           <form @submit.prevent="login">
             <label for="email">Email</label>
             <input type="email" v-model="email" id="email" placeholder="Email" />
+            <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+
             <label for="password">Contraseña</label>
             <div class="password-wrapper">
               <input
@@ -23,6 +25,7 @@
                 <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
               </span>
             </div>
+            <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
 
             <a href="#" class="forgot-password">Olvidé mi contraseña.</a>
 
@@ -47,7 +50,11 @@ export default {
     return {
       email: '',
       password: '',
-      showPassword: false
+      showPassword: false,
+      errors: {
+        email: '',
+        password: ''
+      }
     }
   },
   props: {
@@ -63,7 +70,34 @@ export default {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword
     },
+    validateForm() {
+      this.errors.email = ''
+      this.errors.password = ''
+      let isValid = true
+
+      // Validar que el correo no esté vacío y tenga un formato válido
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!this.email) {
+        this.errors.email = 'El email no puede estar vacío'
+        isValid = false
+      } else if (!emailRegex.test(this.email)) {
+        this.errors.email = 'El formato del email no es válido'
+        isValid = false
+      }
+
+      // Validar que la contraseña no esté vacía
+      if (!this.password) {
+        this.errors.password = 'La contraseña no puede estar vacía'
+        isValid = false
+      }
+
+      return isValid
+    },
     async login() {
+      if (!this.validateForm()) {
+        return
+      }
+
       try {
         const response = await axios.post('http://127.0.0.1:5000/usuario/login', {
           email: this.email,
@@ -71,7 +105,6 @@ export default {
         })
         console.log('Respuesta de login:', response.data)
 
-        // Almacenar el ID del usuario en localStorage
         if (response.data.id_usuario) {
           localStorage.setItem('Usuario_id_usuario', response.data.id_usuario)
         } else {
@@ -203,6 +236,14 @@ export default {
   border-radius: 10px;
 }
 
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  display: block;
+}
+
 .password-wrapper {
   position: relative;
   width: 100%;
@@ -217,7 +258,7 @@ export default {
   position: absolute;
   top: 50%;
   right: 65px;
-  transform: translateY(-70%);
+  transform: translateY(-50%);
   cursor: pointer;
   font-size: 1.2rem;
   color: #af8a8a;

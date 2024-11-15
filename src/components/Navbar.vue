@@ -6,7 +6,10 @@
     </div>
 
     <!-- Mostrar botón "Volver", notificaciones, y perfil en "mis-mascotas" -->
-    <div v-if="isOnMisMascotas" class="menu-desktop">
+    <div
+      v-if="isOnMisMascotas || isOnPerfilMascota || isOnHistorialActividades"
+      class="menu-desktop"
+    >
       <button class="btn btn-outline" @click="goBack">Volver</button>
 
       <!-- Notificaciones y Perfil del Usuario -->
@@ -14,7 +17,8 @@
         <i class="fas fa-bell"></i>
         <div class="user-profile" @click="toggleDropdown">
           <i class="fas fa-user-circle"></i>
-          <span>{{ username }}</span>
+          <span>{{ nombreUsuario }}</span>
+          <!-- Nombre dinámico -->
         </div>
 
         <!-- Menú desplegable para cerrar sesión -->
@@ -53,7 +57,8 @@
         <i class="fas fa-bell"></i>
         <div class="user-profile" @click="toggleDropdown">
           <i class="fas fa-user-circle"></i>
-          <span>{{ username }}</span>
+          <span>{{ nombreUsuario }}</span>
+          <!-- Nombre dinámico del usuario -->
         </div>
 
         <!-- Menú desplegable para cerrar sesión -->
@@ -108,15 +113,22 @@ export default {
     LoginPopup,
     RegisterPopup
   },
+  props: {
+    nombre: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       isAuthenticated: false,
-      username: '',
+      nombreUsuario: this.nombre, // Nombre dinámico inicializado desde props
       showLoginPopupVisible: false,
       showRegisterPopupVisible: false,
       dropdownOpen: false,
       isOnInicio: false,
-      isOnMisMascotas: false // Variable para controlar si estamos en "mis-mascotas"
+      isOnMisMascotas: false,
+      isOnHistorialActividades: false
     }
   },
   mounted() {
@@ -127,6 +139,9 @@ export default {
     '$route.name'() {
       this.checkAuthentication()
       this.checkRoute()
+    },
+    nombre(newNombre) {
+      this.nombreUsuario = newNombre // Actualiza el nombre dinámico al cambiar la prop
     }
   },
   methods: {
@@ -134,16 +149,18 @@ export default {
       const token = localStorage.getItem('authToken')
       if (token) {
         this.isAuthenticated = true
-        this.username = localStorage.getItem('nombre')
+        this.nombreUsuario = localStorage.getItem('nombre') || this.nombreUsuario
       } else {
         this.isAuthenticated = false
-        this.username = ''
+        this.nombreUsuario = ''
       }
     },
     checkRoute() {
       // Actualizar isOnInicio dependiendo de la ruta
       this.isOnInicio = this.$route.name === 'inicio'
       this.isOnMisMascotas = this.$route.name === 'mis-mascotas'
+      this.isOnPerfilMascota = this.$route.name === 'perfil-mascota'
+      this.isOnHistorialActividades = this.$route.name === 'historial-actividades'
     },
     showLoginPopup() {
       this.showLoginPopupVisible = true
@@ -187,8 +204,11 @@ export default {
       })
     },
     logout() {
+      // Eliminar todos los datos del localStorage relacionados con la sesión del usuario
       localStorage.removeItem('authToken')
+      localStorage.removeItem('Usuario_id_usuario')
       localStorage.removeItem('nombre')
+
       this.isAuthenticated = false
       this.$router.push('/')
       Swal.fire({
@@ -205,7 +225,6 @@ export default {
       this.$router.push({ name: 'panel-usuario' })
     },
     goBack() {
-      // Ir a la página anterior o al panel de usuario
       this.$router.go(-1)
     }
   }

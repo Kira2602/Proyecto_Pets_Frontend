@@ -9,6 +9,7 @@
           <div class="form-group">
             <label for="name">Nombre:</label>
             <input type="text" id="name" v-model="user.name" />
+            <span v-if="errors.name" class="error-message">{{ errors.name }}</span>
           </div>
 
           <div class="form-group">
@@ -19,31 +20,13 @@
           <div class="form-group">
             <label for="phone">Teléfono:</label>
             <input type="text" id="phone" v-model="user.phone" />
+            <span v-if="errors.phone" class="error-message">{{ errors.phone }}</span>
           </div>
           <div class="button-group">
             <button class="btn-save" type="submit">Guardar</button>
             <button class="btn-cancel" type="button" @click="closePopup">Cancelar</button>
           </div>
         </form>
-
-        <!-- Formulario para cambiar la contraseña -->
-
-        <!--
-          <form @submit.prevent="changePassword">
-            <div class="form-group">
-              <label for="currentPassword">Contraseña Actual:</label>
-              <input type="password" id="currentPassword" v-model="passwords.currentPassword" />
-            </div>
-
-            <div class="form-group">
-              <label for="newPassword">Nueva Contraseña:</label>
-              <input type="password" id="newPassword" v-model="passwords.newPassword" />
-            </div>
-
-            <div class="button-group">
-              <button class="btn-save" type="submit">Cambiar Contraseña</button>
-            </div>
-          </form>-->
 
         <div class="footer-image">
           <img src="@/components/images/paws_icon.png" alt="Cat paws" />
@@ -64,8 +47,7 @@ export default {
     isVisible: {
       type: Boolean,
       default: false
-    },
-    
+    }
   },
 
   data() {
@@ -73,11 +55,11 @@ export default {
       user: {
         name: '',
         email: '',
-        phone: '',
+        phone: ''
       },
-      passwords: {
-        currentPassword: '',
-        newPassword: ''
+      errors: {
+        name: '',
+        phone: ''
       }
     }
   },
@@ -85,38 +67,57 @@ export default {
     closePopup() {
       this.$emit('close')
     },
-    saveProfile() {
-      console.log('Perfil guardado:', this.user)
-      this.closePopup()
+
+    validateForm() {
+      this.errors.name = ''
+      this.errors.phone = ''
+      let isValid = true
+
+      if (!this.user.name) {
+        this.errors.name = 'El nombre no puede estar vacío'
+        isValid = false
+      }
+
+      if (!this.user.phone) {
+        this.errors.phone = 'El teléfono no puede estar vacío'
+        isValid = false
+      }
+
+      return isValid
     },
+
     async fetchUserData() {
       try {
-        const userId = localStorage.getItem('Usuario_id_usuario'); 
+        const userId = localStorage.getItem('Usuario_id_usuario')
 
-        const response = await axios.get(`http://127.0.0.1:5000/usuario/${userId}`);
+        const response = await axios.get(`http://127.0.0.1:5000/usuario/${userId}`)
         this.user = {
           name: response.data.nombre,
           email: response.data.email,
           phone: response.data.telefono || 'No disponible'
-        };
+        }
       } catch (error) {
-        console.error('Error al obtener los datos del usuario:', error);
+        console.error('Error al obtener los datos del usuario:', error)
       }
     },
-    async updateUser() {
-      console.log('updateUser fue llamado')
 
-      console.log(`Datos enviados: Nombre - ${this.user.name}, Teléfono - ${this.user.phone}`)
+    async updateUser() {
+      if (!this.validateForm()) {
+        return
+      }
 
       try {
-        // Enviar la solicitud PUT al servidor para actualizar el usuario con el ID 1 para pruebas
+        const userId = localStorage.getItem('Usuario_id_usuario')
 
-        const response = await axios.put(`http://127.0.0.1:5000/usuario/${1}`, {
+        const response = await axios.put(`http://127.0.0.1:5000/usuario/${userId}`, {
           nombre: this.user.name,
           telefono: this.user.phone
         })
 
-        console.log('Usuario actualizado:', response.data)
+        localStorage.setItem('nombre', this.user.name)
+        localStorage.setItem('telefono', this.user.phone)
+
+        this.$emit('perfilActualizado', { nombre: this.user.name })
 
         Swal.fire({
           icon: 'success',
@@ -126,7 +127,7 @@ export default {
           timer: 1500
         })
 
-        this.closePopup() // Cerrar el popup después de actualizar
+        this.closePopup()
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -135,45 +136,10 @@ export default {
           showConfirmButton: true
         })
       }
-    },
-
-    //Para cambiar el password
-    async changePassword() {
-      console.log('changePassword fue llamado')
-      console.log(
-        `Contraseña actual: ${this.passwords.currentPassword}, Nueva contraseña: ${this.passwords.newPassword}`
-      )
-
-      try {
-        // Enviar la solicitud PUT al servidor para cambiar la contraseña del usuario con el ID 1 para pruebas
-        const response = await axios.put(`http://127.0.0.1:5000/usuario/cambiar/${1}`, {
-          contrasenia_actual: this.passwords.currentPassword,
-          nueva_contrasenia: this.passwords.newPassword
-        })
-
-        console.log('Contraseña actualizada:', response.data)
-
-        Swal.fire({
-          icon: 'success',
-          title: 'Contraseña actualizada',
-          text: 'La contraseña ha sido actualizada correctamente',
-          showConfirmButton: false,
-          timer: 1500
-        })
-
-        this.closePopup() // Cerrar el popup después de actualizar si es necesario
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error en la actualización',
-          text: 'No se pudo actualizar la contraseña. Verifica los datos e intenta nuevamente',
-          showConfirmButton: true
-        })
-      }
     }
   },
   mounted() {
-    this.fetchUserData(); 
+    this.fetchUserData()
   }
 }
 </script>
@@ -268,6 +234,12 @@ input {
 input:focus {
   outline: none;
   border-color: #af8a8a;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .button-group {
