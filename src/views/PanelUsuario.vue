@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="redirectToSalud">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/perro.png" alt="Salud" />
@@ -215,7 +215,11 @@ export default {
     },
     actualizarNombreUsuario(datos) {
       this.nombreUsuario = datos.nombre // Actualizar el nombre del usuario después de editarlo
-    }
+    },
+    redirectToSalud() {
+      // Redirigir a la vista de mis-mascotas
+      this.$router.push({ name: 'salud' })
+    },
   },
   mounted() {
     this.usuarioId = localStorage.getItem('Usuario_id_usuario')
