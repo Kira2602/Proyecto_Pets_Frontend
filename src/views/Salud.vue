@@ -15,7 +15,7 @@
       </div>
     </section>
     <div class="button">
-      <button class="hero-button" @click="handleRedirection">Nuevo Registro</button>
+      <button class="hero-button" @click="openRegisterSaludPopup">Nuevo Registro</button>
     </div>
 
 
@@ -140,6 +140,12 @@
           </div>
         </div>
     </div>  
+    <!-- Registrar Nuevo registro salud -->
+    <RegisterSaludPopUp
+        v-if="isRegisterSaludPopupVisible"
+        @close="isRegisterSaludPopupVisible = false"
+        @Salud-registrada="agregarSalud"
+      />
         <!-- Footer -->
         <footer class="footer">
           <div class="footer-content">
@@ -152,15 +158,18 @@
   
   <script>
   import Navbar from '@/components/Navbar.vue'
+import RegisterSaludPopUp from '@/components/RegisterSaludPopUp.vue';
   import lottie from 'lottie-web'
   
   export default {
     name: 'Salud',
     components: {
-      Navbar
+      Navbar,
+      RegisterSaludPopUp
     },
     data() {
       return {
+        isRegisterSaludPopupVisible: false,
         selectedPet: '',
         selectedCategory: '',
         selectedStatus: '',
@@ -191,6 +200,13 @@
           }
         ]
       }
+    },
+    methods:{
+      // Abrir popup para registrar nueva mascota
+      openRegisterSaludPopup() {
+        this.isRegisterSaludPopupVisible = true
+      },
+
     },
     computed: {
       filteredActivities() {
