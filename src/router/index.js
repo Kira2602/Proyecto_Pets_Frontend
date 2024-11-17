@@ -35,8 +35,8 @@ const router = createRouter({
       component: HistorialActividades
     },
     {
-      path: '/salud',
-      name: 'Salud',
+      path: '/salud-mascota',
+      name: 'salud-mascota',
       component: Salud
     }
   ]

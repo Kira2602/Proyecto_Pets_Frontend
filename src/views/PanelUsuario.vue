@@ -210,7 +210,7 @@ export default {
       this.$router.push({ name: 'mis-mascotas' })
     },
     redirectToSalud() {
-      this.$router.push({ name: 'salud' })
+      this.$router.push({ name: 'salud-mascota' })
     },
     redirectToHistorialActividades() {
       this.$router.push({ name: 'historial-actividades' })
