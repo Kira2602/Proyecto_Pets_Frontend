@@ -210,13 +210,17 @@ export default {
       this.$router.push({ name: 'mis-mascotas' })
     },
     redirectToSalud() {
-      this.$router.push({ name: 'salud-mascota' })
+      this.$router.push({ name: 'salud' })
     },
     redirectToHistorialActividades() {
       this.$router.push({ name: 'historial-actividades' })
     },
     actualizarNombreUsuario(datos) {
       this.nombreUsuario = datos.nombre // Actualizar el nombre del usuario después de editarlo
+    },
+    redirectToSalud() {
+      // Redirigir a la vista de mis-mascotas
+      this.$router.push({ name: 'salud' })
     }
   },
   mounted() {
