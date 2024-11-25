@@ -226,7 +226,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffcad4;
+  background-color: #ffe5d9;
   padding: 40px;
   margin: 10px 0;
   position: relative;
@@ -311,7 +311,7 @@ body {
 
 /* Estilos de la sección de redes sociales */
 .social-media {
-  background-color: #ffcad4;
+  background-color: #ffe5d9;
   padding: 40px 0;
   text-align: center;
   margin-bottom: 0;

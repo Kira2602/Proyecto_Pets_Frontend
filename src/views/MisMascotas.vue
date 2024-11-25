@@ -150,7 +150,7 @@ export default {
 /* Contenedor rosado con el título y las tarjetas */
 .mascotas-container {
   text-align: center;
-  background-color: #ffcad4;
+  background-color: #ffe5d9;
   border-radius: 20px;
   max-width: 800px;
   margin: 0 auto;

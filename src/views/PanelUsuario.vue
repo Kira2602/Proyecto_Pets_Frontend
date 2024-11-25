@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="redirectToSalud">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/perro.png" alt="Salud" />
@@ -40,7 +40,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="openWalkPopup">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/collar.png" alt="Paseos" />
@@ -48,7 +48,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="openFoodPopup">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/comida.png" alt="Comida" />
@@ -56,7 +56,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="openMedicalAppointmentPopup">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/gestion_citas_medicas_icon.png" alt="Citas médicas" />
@@ -64,11 +64,12 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+
+        <div class="icon-card" @click="redirectToHistorialActividades">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/history.png" alt="Historial de mascotas" />
-              <p>Historial de mascotas</p>
+              <p>Historial de actividades mascotas</p>
             </div>
           </div>
         </div>
@@ -88,7 +89,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="openOtherActivityPopup">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/agregar_actividad.png" alt="Otras actividades" />
@@ -118,8 +119,26 @@
       @close="isEditProfilePopupVisible = false"
       @perfilActualizado="actualizarNombreUsuario"
     />
-
+    <!-- Popup de registrar mascota -->
     <RegisterPetPopup v-if="isRegisterPetPopupVisible" @close="isRegisterPetPopupVisible = false" />
+
+    <!-- Popup de registrar cita medica -->
+    <RegisterMedicalAppointmentPopup
+      v-if="isMedicalAppointmentPopupVisible"
+      @close="isMedicalAppointmentPopupVisible = false"
+    />
+
+    <!-- Popup de registrar paseo -->
+    <RegisterWalkPopup v-if="isWalkPopupVisible" @close="isWalkPopupVisible = false" />
+
+    <!-- Popup de registrar comida -->
+    <RegisterFoodPopup v-if="isFoodPopupVisible" @close="isFoodPopupVisible = false" />
+
+    <!-- Popup de registrar otra actividad -->
+    <RegisterOtherActivityPopup
+      v-if="isOtherActivityPopupVisible"
+      @close="isOtherActivityPopupVisible = false"
+    />
   </div>
 </template>
 
@@ -128,6 +147,10 @@ import Navbar from '@/components/Navbar.vue'
 import UserProfilePopup from '@/components/UserProfilePopup.vue'
 import EditProfilePopup from '@/components/EditProfilePopup.vue'
 import RegisterPetPopup from '@/components/RegisterPetPopup.vue'
+import RegisterMedicalAppointmentPopup from '@/components/RegisterMedicalAppointmentPopup.vue'
+import RegisterWalkPopup from '@/components/RegisterWalkPopup.vue'
+import RegisterFoodPopup from '@/components/RegisterFoodPopup.vue'
+import RegisterOtherActivityPopup from '@/components/RegisterOtherActivityPopup.vue'
 
 export default {
   name: 'PanelUsuario',
@@ -135,13 +158,21 @@ export default {
     Navbar,
     UserProfilePopup,
     EditProfilePopup,
-    RegisterPetPopup
+    RegisterPetPopup,
+    RegisterMedicalAppointmentPopup,
+    RegisterWalkPopup,
+    RegisterFoodPopup,
+    RegisterOtherActivityPopup
   },
   data() {
     return {
       isProfilePopupVisible: false, // Controla la visibilidad del popup de perfil
       isEditProfilePopupVisible: false, // Controla la visibilidad del popup de edición
       isRegisterPetPopupVisible: false, // Controla la visibilidad del popup de perfil
+      isMedicalAppointmentPopupVisible: false,
+      isWalkPopupVisible: false,
+      isFoodPopupVisible: false,
+      isOtherActivityPopupVisible: false,
       usuarioId: null, // ID del usuario almacenado
       nombreUsuario: localStorage.getItem('nombre') || '' // Inicializar con el nombre almacenado
     }
@@ -163,13 +194,34 @@ export default {
         alert('Debes iniciar sesión para registrar una mascota.')
       }
     },
+    openMedicalAppointmentPopup() {
+      this.isMedicalAppointmentPopupVisible = true
+    },
+    openWalkPopup() {
+      this.isWalkPopupVisible = true
+    },
+    openFoodPopup() {
+      this.isFoodPopupVisible = true
+    },
+    openOtherActivityPopup() {
+      this.isOtherActivityPopupVisible = true
+    },
     redirectToMisMascotas() {
-      // Redirigir a la vista de mis-mascotas
       this.$router.push({ name: 'mis-mascotas' })
+    },
+    redirectToSalud() {
+      this.$router.push({ name: 'salud' })
+    },
+    redirectToHistorialActividades() {
+      this.$router.push({ name: 'historial-actividades' })
     },
     actualizarNombreUsuario(datos) {
       this.nombreUsuario = datos.nombre // Actualizar el nombre del usuario después de editarlo
-    }
+    },
+    redirectToSalud() {
+      // Redirigir a la vista de mis-mascotas
+      this.$router.push({ name: 'salud' })
+    },
   },
   mounted() {
     this.usuarioId = localStorage.getItem('Usuario_id_usuario')

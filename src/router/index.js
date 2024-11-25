@@ -3,6 +3,8 @@ import PaginaInicio from '@/views/PaginaInicio.vue'
 import PanelUsuario from '@/views/PanelUsuario.vue'
 import MisMascotas from '@/views/MisMascotas.vue'
 import PerfilMascota from '@/views/PerfilMascota.vue'
+import HistorialActividades from '@/views/HistorialActividades.vue'
+import Salud from '@/views/Salud.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,7 +28,17 @@ const router = createRouter({
       path: '/perfil-mascota/:id',
       name: 'perfil-mascota',
       component: PerfilMascota
-    }
+    },
+    {
+      path: '/historial-actividades',
+      name: 'historial-actividades',
+      component: HistorialActividades
+    },
+    {
+      path: '/salud',
+      name: 'salud',
+      component: Salud
+    },
   ]
 })
 
