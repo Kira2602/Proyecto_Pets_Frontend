@@ -67,7 +67,15 @@
       <div class="contenedor-principal">
         <!-- Filtros -->
         <div class="filtros">
-          <!-- Filtros -->
+          <div class="filtro">
+            <label>Buscar:</label>
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Buscar por nombre de mascota u observación"
+              class="custom-input"
+            />
+          </div>
           <div class="filtro">
             <label>Ver registro de:</label>
             <select v-model="selectedPet" class="custom-select">
@@ -106,6 +114,11 @@
               />
             </div>
           </div>
+
+          <!-- Animación de Lottie -->
+          <div class="lottie-container">
+            <div ref="lottieAnimation" class="lottie-animation"></div>
+          </div>
         </div>
 
         <!-- Tabla de actividades -->
@@ -131,6 +144,7 @@
                     v-if="actividad.archivo"
                     :href="`http://127.0.0.1:5000/uploads/${actividad.archivo}`"
                     :download="actividad.archivo"
+                    class="link-descarga"
                   >
                     Descargar
                   </a>
@@ -140,35 +154,35 @@
             </tbody>
           </table>
         </div>
+      </div>
 
-        <!-- Paginación -->
-        <div class="pagination-container">
-          <ul class="pagination">
-            <li
-              class="page-item"
-              :class="{ disabled: currentPage === 1 }"
-              @click="changePage(currentPage - 1)"
-            >
-              <a class="page-link page-prev">«</a>
-            </li>
-            <li
-              v-for="page in totalPages"
-              :key="page"
-              class="page-item"
-              :class="{ active: currentPage === page }"
-              @click="changePage(page)"
-            >
-              <a class="page-link">{{ page }}</a>
-            </li>
-            <li
-              class="page-item"
-              :class="{ disabled: currentPage === totalPages }"
-              @click="changePage(currentPage + 1)"
-            >
-              <a class="page-link page-next">»</a>
-            </li>
-          </ul>
-        </div>
+      <!-- Paginación fuera del contenedor principal -->
+      <div class="pagination-container">
+        <ul class="pagination">
+          <li
+            class="page-item"
+            :class="{ disabled: currentPage === 1 }"
+            @click="changePage(currentPage - 1)"
+          >
+            <a class="page-link page-prev">«</a>
+          </li>
+          <li
+            v-for="page in totalPages"
+            :key="page"
+            class="page-item"
+            :class="{ active: currentPage === page }"
+            @click="changePage(page)"
+          >
+            <a class="page-link">{{ page }}</a>
+          </li>
+          <li
+            class="page-item"
+            :class="{ disabled: currentPage === totalPages }"
+            @click="changePage(currentPage + 1)"
+          >
+            <a class="page-link page-next">»</a>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -203,6 +217,7 @@ export default {
   data() {
     return {
       isRegisterSaludPopupVisible: false,
+      searchQuery: '',
       selectedPet: '',
       selectedCategory: '',
       selectedYear: new Date().getFullYear(),
@@ -210,8 +225,8 @@ export default {
       mascotas: [],
       categorias: [],
       actividades: [],
-      currentPage: 1, // Página actual
-      itemsPerPage: 5 // Número de registros por página
+      currentPage: 1,
+      itemsPerPage: 9
     }
   },
   computed: {
@@ -228,7 +243,13 @@ export default {
           this.selectedCategory === '' || actividad.tipo === this.selectedCategory
         const matchYear = !this.filterDate.año || actividad.fecha.includes(this.selectedYear)
 
-        return matchPet && matchCategory && matchYear
+        // Nuevo: Filtrar por búsqueda en nombre de mascota y observación
+        const matchSearch =
+          this.searchQuery === '' ||
+          actividad.mascota.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          actividad.observacion.toLowerCase().includes(this.searchQuery.toLowerCase())
+
+        return matchPet && matchCategory && matchYear && matchSearch
       })
     },
     paginatedActivities() {
@@ -259,11 +280,13 @@ export default {
           `http://127.0.0.1:5000/salud/mis-registros?Usuario_id_usuario=${usuarioId}`
         )
         this.actividades = response.data
+        console.log('Datos cargados:', this.actividades) // Verifica aquí los datos
       } catch (error) {
         console.error('Error al obtener los registros de salud:', error)
         alert('No se pudieron cargar los registros. Intenta nuevamente.')
       }
     },
+
     async fetchMascotas() {
       try {
         const usuarioId = localStorage.getItem('Usuario_id_usuario')
@@ -517,16 +540,6 @@ h2 {
   height: 150px;
   margin-top: 0px;
   margin-bottom: 5px;
-}
-.tabla-actividades {
-  flex: 2;
-  max-height: 300px; /* Ajusta la altura máxima */
-  overflow-y: auto; /* Scroll vertical */
-  overflow-x: auto; /* Scroll horizontal si es necesario */
-  padding: 20px;
-  background-color: rgba(255, 255, 255, 0.47);
-  border-radius: 15px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 table {
@@ -830,12 +843,26 @@ button {
   padding: 0 10px;
 }
 
+.tabla-actividades {
+  flex: 2;
+  max-height: 700px; /* Ajusta la altura máxima */
+  overflow-y: auto; /* Scroll vertical */
+  overflow-x: auto; /* Scroll horizontal si es necesario */
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.47);
+  border-radius: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
 .pagination-container {
   margin-top: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 10px 0;
+  margin-left: 700px;
+  width: fit-content;
 }
 
 .pagination {
@@ -895,5 +922,15 @@ button {
 .page-next:hover {
   background-color: #8e6c88 !important;
   color: white !important;
+}
+
+.link-descarga {
+  color: #8b4513;
+  text-decoration: none;
+}
+
+.link-descarga:hover {
+  color: #a0522d;
+  text-decoration: underline;
 }
 </style>
