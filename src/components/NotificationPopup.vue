@@ -14,6 +14,21 @@
         </div>
 
         <div class="config-container">
+        <!-- Campo siempre visible para la descripción -->
+        <div class="summary-row">
+          <label>Descripción de la notificación:</label>
+          <input
+            type="text"
+            v-model="notification.mensaje"
+            :class="{ 'error-border': errors.mensaje }"
+            class="styled-input"
+            placeholder="Ej. Revisar estado de la mascota"
+          />
+          <span v-if="errors.mensaje" class="error-message">{{ errors.description }}</span>
+        </div>
+
+        <!-- Mostrar solo si es "repetir" -->
+        <template v-if="notification.type === 'repeat'">
           <div class="summary-row">
             <label>Cada:</label>
             <input
@@ -31,19 +46,6 @@
           </div>
 
           <div class="summary-row">
-            <label>Fecha y hora de inicio:</label>
-            <input
-              type="datetime-local"
-              v-model="notification.startDateTime"
-              :class="{ 'error-border': errors.startDateTime }"
-              class="styled-input"
-            />
-            <span v-if="errors.startDateTime" class="error-message">{{
-              errors.startDateTime
-            }}</span>
-          </div>
-
-          <div class="summary-row">
             <label>Fecha y hora de finalización:</label>
             <input
               type="datetime-local"
@@ -53,8 +55,25 @@
             />
             <span v-if="errors.endDateTime" class="error-message">{{ errors.endDateTime }}</span>
           </div>
+        </template>
+
+        <!-- Campo común para "fecha y hora de inicio" -->
+        <div class="summary-row">
+          <label>Fecha y hora de inicio:</label>
+          <input
+            type="datetime-local"
+            v-model="notification.startDateTime"
+            :class="{ 'error-border': errors.startDateTime }"
+            class="styled-input"
+          />
+          <span v-if="errors.startDateTime" class="error-message">{{ errors.startDateTime }}</span>
         </div>
-        <button class="continue-btn" @click="validateStep1">Continuar</button>
+      </div>
+
+        <button class="continue-btn" 
+        @click="validateStep1"
+        >
+        Continuar</button>
       </div>
 
       <div class="popup-content" v-if="step === 2">
@@ -66,7 +85,8 @@
           <label><input type="radio" v-model="reminder.type" value="onTime" /> En la hora</label>
           <label><input type="radio" v-model="reminder.type" value="before" /> Antes de</label>
         </div>
-
+      <!-- Campos de configuración solo si se selecciona "Antes de" -->
+      <template v-if="reminder.type === 'before'">
         <div class="config-container">
           <div class="summary-row">
             <label>Un:</label>
@@ -95,55 +115,68 @@
             <span v-if="errors.time" class="error-message">{{ errors.time }}</span>
           </div>
         </div>
+      </template>
+
         <button class="continue-btn" @click="validateStep2">Continuar</button>
       </div>
 
       <div class="popup-content" v-if="step === 3">
-        <!-- Fase 3: Resumen -->
-        <h2>Resumen</h2>
-        <div class="summary-container">
-          <div class="summary-row">
-            <label>Cita médica para:</label>
-            <input type="text" v-model="notification.type" class="styled-input" disabled />
-          </div>
+      <!-- Fase 3: Resumen -->
+      <h2>Resumen</h2>
+      <div class="summary-container">
+        <!-- Campos comunes -->
+        <div >
+      <label>'tipo actividad' para 'mascota seleccionada'</label>
+    </div>
+        <div class="summary-row">
+          <label>mensaje de la notificacion:</label>
+          <input type="text" v-model="notification.mensaje" class="styled-input" disabled />
+        </div>
 
-          <div class="summary-row">
-            <label>Tu cita médica:</label>
-            <input type="text" v-model="notification.description" class="styled-input" />
-          </div>
+        <div class="summary-row">
+          <label>Fecha y hora de inicio:</label>
+          <input type="text" :value="notification.startDateTime" class="styled-input" disabled />
+        </div>
 
-          <div class="summary-row">
-            <label>Recordar:</label>
-            <input type="text" :value="notification.startDateTime" class="styled-input" disabled />
-          </div>
-
+        <!-- Mostrar campos específicos si es "Repetir" -->
+        <template v-if="notification.type === 'repeat'">
           <div class="summary-row">
             <label>Se repetirá cada:</label>
             <input
               type="text"
-              :value="`cada ${notification.interval} ${notification.unit}`"
+              :value="`Cada ${notification.interval} ${notification.unit}`"
               class="styled-input"
               disabled
             />
           </div>
-
           <div class="summary-row">
-            <label>Se recuerda:</label>
-            <input
-              type="text"
-              :value="`${reminder.amount} ${reminder.unit} antes`"
-              class="styled-input"
-              disabled
-            />
+            <label>Fecha y hora de finalización:</label>
+            <input type="text" :value="notification.endDateTime" class="styled-input" disabled />
           </div>
+        </template>
 
+        <!-- Mostrar recordatorio -->
+        <div class="summary-row">
+          <label>Recordar:</label>
+          <input
+            type="text"
+            :value="reminder.type === 'onTime' ? 'En la hora' : `Antes de ${reminder.amount} ${reminder.unit}`"
+            class="styled-input"
+            disabled
+          />
+        </div>
+
+        <!-- Mostrar hora específica si es "Antes de" -->
+        <template v-if="reminder.type === 'before'">
           <div class="summary-row">
-            <label>Hora del recordatorio:</label>
+            <label>En la hora:</label>
             <input type="time" v-model="reminder.time" class="styled-input" disabled />
           </div>
-        </div>
-        <button class="save-btn" @click="saveNotification">Guardar</button>
+        </template>
       </div>
+      <button class="save-btn" @click="saveNotification">Guardar</button>
+    </div>
+
     </div>
   </div>
 </template>
@@ -189,42 +222,61 @@ export default {
       this.$emit('close')
     },
     validateStep1() {
-      this.errors = { interval: '', startDateTime: '', endDateTime: '' }
+      // Reiniciar errores
+      this.errors = { mensaje: '', interval: '', startDateTime: '', endDateTime: '' };
 
-      if (!this.notification.interval) {
-        this.errors.interval = 'Este campo es obligatorio'
+      // Validar campos comunes (aplicables para ambos casos)
+      if (!this.notification.mensaje) {
+        this.errors.mensaje = 'La descripción es obligatoria';
       }
       if (!this.notification.startDateTime) {
-        this.errors.startDateTime = 'Este campo es obligatorio'
-      }
-      if (!this.notification.endDateTime) {
-        this.errors.endDateTime = 'Este campo es obligatorio'
+        this.errors.startDateTime = 'La fecha y hora de inicio es obligatoria';
       }
 
-      if (!this.errors.interval && !this.errors.startDateTime && !this.errors.endDateTime) {
-        this.step++
+      // Validar campos específicos para "Repetir"
+      if (this.notification.type === 'repeat') {
+        if (!this.notification.interval || this.notification.interval <= 0) {
+          this.errors.interval = 'El intervalo debe ser mayor a 0';
+        }
+        if (!this.notification.endDateTime) {
+          this.errors.endDateTime = 'La fecha y hora de finalización es obligatoria';
+        }
+      }
+
+      // Comprobar si no hay errores
+      const hasErrors = Object.values(this.errors).some((error) => error);
+      if (!hasErrors) {
+        this.step++; // Avanzar al siguiente paso
         setTimeout(() => {
           this.loadLottieAnimation(
             this.$refs.lottieCatIcon2,
             'https://lottie.host/83c0af8f-8bdf-4dcb-8d7b-86c9a655e316/KhQBfssaOD.json'
-          )
-        }, 100)
+          );
+        }, 100);
       }
     },
+
     validateStep2() {
-      this.errors = { amount: '', time: '' }
+  // Reiniciar errores
+  this.errors = { amount: '', time: '' };
 
-      if (!this.reminder.amount) {
-        this.errors.amount = 'Este campo es obligatorio'
-      }
-      if (!this.reminder.time) {
-        this.errors.time = 'Este campo es obligatorio'
+      // Validar solo si se selecciona "Antes de"
+      if (this.reminder.type === 'before') {
+        if (!this.reminder.amount || this.reminder.amount <= 0) {
+          this.errors.amount = 'La cantidad debe ser mayor a 0';
+        }
+        if (!this.reminder.time) {
+          this.errors.time = 'La hora es obligatoria';
+        }
       }
 
-      if (!this.errors.amount && !this.errors.time) {
-        this.step++
+      // Comprobar si no hay errores
+      const hasErrors = Object.values(this.errors).some((error) => error);
+      if (!hasErrors) {
+        this.step++; // Avanzar al siguiente paso
       }
     },
+
     saveNotification() {
       const notificationData = { ...this.notification, ...this.reminder }
       this.$emit('saveNotification', notificationData)
