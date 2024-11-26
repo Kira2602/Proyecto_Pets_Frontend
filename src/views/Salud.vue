@@ -74,7 +74,7 @@
             <label>Ver registro de:</label>
             <select v-model="selectedPet" class="custom-select">
               <option value="">Todas mis mascotas</option>
-              <option v-for="mascota in mascotas" :key="mascota.id" :value="mascota.nombre">
+              <option v-for="mascota in mascotas" :key="mascota.id_mascota" :value="mascota.nombre">
                 {{ mascota.nombre }}
               </option>
             </select>
@@ -125,29 +125,40 @@
                 <th>Id</th>
                 <th>Mascota</th>
                 <th>Fecha</th>
-                <th>Observacion</th>
+                <th>Observación</th>
                 <th>Archivo</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="actividad in filteredActivities" :key="actividad.id">
-                <td>{{ actividad.id }}</td>
+              <tr v-for="actividad in filteredActivities" :key="actividad.id_salud">
+                <td>{{ actividad.id_salud }}</td>
                 <td>{{ actividad.mascota }}</td>
                 <td>{{ actividad.fecha }}</td>
                 <td>{{ actividad.observacion }}</td>
-                <td>{{ actividad.archivo }}</td>
+                <td>
+                  <a
+                    v-if="actividad.archivo"
+                    :href="`http://127.0.0.1:5000/uploads/${actividad.archivo}`"
+                    :download="actividad.archivo"
+                  >
+                    Descargar
+                  </a>
+                  <span v-else>No disponible</span>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
+
     <!-- Registrar Nuevo registro salud -->
     <RegisterSaludPopUp
       v-if="isRegisterSaludPopupVisible"
       @close="isRegisterSaludPopupVisible = false"
-      @Salud-registrada="agregarSalud"
+      @registroCreado="agregarRegistroLocal"
     />
+
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-content">
@@ -161,6 +172,7 @@
 import Navbar from '@/components/Navbar.vue'
 import RegisterSaludPopUp from '@/components/RegisterSaludPopUp.vue'
 import lottie from 'lottie-web'
+import axios from 'axios'
 
 export default {
   name: 'Salud',
@@ -173,55 +185,83 @@ export default {
       isRegisterSaludPopupVisible: false,
       selectedPet: '',
       selectedCategory: '',
-      selectedStatus: '',
       selectedYear: new Date().getFullYear(),
       filterDate: { dia: false, mes: false, año: true },
-      mascotas: [
-        { id: 1, nombre: 'Coco' },
-        { id: 2, nombre: 'Lulu' }
-      ],
-      categorias: ['Vacunas', 'Paseo', 'Comida', 'Otra actividad'],
-      estados: ['Completado', 'Pendiente', 'Cancelado'],
-      actividades: [
-        {
-          id: 1,
-          mascota: 'Coco',
-          fecha: '26/06/2024',
-          categoria: 'Vacunas',
-          estado: 'Completado',
-          descripcion: 'octavalente.pdf'
-        },
-        {
-          id: 2,
-          mascota: 'Lulu',
-          fecha: '22/09/2024',
-          categoria: 'Paseo',
-          estado: 'Completado',
-          descripcion: 'parque'
-        }
-      ]
+      mascotas: [],
+      categorias: [],
+      actividades: []
     }
   },
   methods: {
-    // Abrir popup para registrar nueva mascota
     openRegisterSaludPopup() {
       this.isRegisterSaludPopupVisible = true
+    },
+    async agregarSalud() {
+      await this.fetchRegistrosSalud()
+    },
+    agregarRegistroLocal(nuevoRegistro) {
+      console.log('Registro agregado localmente:', nuevoRegistro)
+      this.actividades.unshift(nuevoRegistro) // Añadir el nuevo registro al inicio
+      this.isRegisterSaludPopupVisible = false // Cerrar el popup
+    },
+
+    async fetchRegistrosSalud() {
+      try {
+        const usuarioId = localStorage.getItem('Usuario_id_usuario')
+        const response = await axios.get(
+          `http://127.0.0.1:5000/salud/mis-registros?Usuario_id_usuario=${usuarioId}`
+        )
+        this.actividades = response.data
+      } catch (error) {
+        console.error('Error al obtener los registros de salud:', error)
+        alert('No se pudieron cargar los registros. Intenta nuevamente.')
+      }
+    },
+    async fetchMascotas() {
+      try {
+        const usuarioId = localStorage.getItem('Usuario_id_usuario')
+        const response = await axios.get(
+          `http://127.0.0.1:5000/mascota/mis-mascotas?Usuario_id_usuario=${usuarioId}`
+        )
+        this.mascotas = response.data
+      } catch (error) {
+        console.error('Error al cargar mascotas:', error)
+        alert('No se pudieron cargar las mascotas. Intenta nuevamente.')
+      }
+    },
+    async fetchCategorias() {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/salud/categorias')
+        this.categorias = response.data.map((categoria) => categoria.tipo)
+      } catch (error) {
+        console.error('Error al cargar categorías:', error)
+        alert('No se pudieron cargar las categorías. Intenta nuevamente.')
+      }
     }
   },
   computed: {
     filteredActivities() {
       return this.actividades.filter((actividad) => {
+        // Verifica que los campos necesarios existen
+        if (!actividad.mascota || !actividad.fecha || !actividad.tipo) {
+          console.warn('Actividad incompleta:', actividad)
+          return false
+        }
+
         const matchPet = this.selectedPet === '' || actividad.mascota === this.selectedPet
         const matchCategory =
-          this.selectedCategory === '' || actividad.categoria === this.selectedCategory
-        const matchStatus = this.selectedStatus === '' || actividad.estado === this.selectedStatus
+          this.selectedCategory === '' || actividad.tipo === this.selectedCategory
         const matchYear = !this.filterDate.año || actividad.fecha.includes(this.selectedYear)
 
-        return matchPet && matchCategory && matchStatus && matchYear
+        return matchPet && matchCategory && matchYear
       })
     }
   },
   mounted() {
+    this.fetchRegistrosSalud()
+    this.fetchMascotas()
+    this.fetchCategorias()
+
     // Cargar animación de Lottie
     this.lottieInstance = lottie.loadAnimation({
       container: this.$refs.lottieAnimation,
