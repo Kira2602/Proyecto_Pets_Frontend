@@ -813,14 +813,14 @@ button {
 .card-title {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #9d8189; /* Color para el título */
+  color: #9d8189;
   text-align: center;
   margin-bottom: 10px;
 }
 .card-title1 {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #f0eaec; /* Color para el título */
+  color: #f0eaec;
   text-align: center;
   margin-bottom: 10px;
 }
@@ -845,9 +845,9 @@ button {
 
 .tabla-actividades {
   flex: 2;
-  max-height: 700px; /* Ajusta la altura máxima */
-  overflow-y: auto; /* Scroll vertical */
-  overflow-x: auto; /* Scroll horizontal si es necesario */
+  max-height: 700px;
+  overflow-y: auto;
+  overflow-x: auto;
   padding: 20px;
   background-color: rgba(255, 255, 255, 0.47);
   border-radius: 15px;
@@ -925,7 +925,7 @@ button {
 }
 
 .link-descarga {
-  color: #8b4513;
+  color: #6fd297;
   text-decoration: none;
 }
 
