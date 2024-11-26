@@ -30,7 +30,6 @@
             Organiza y gestiona las citas médicas y los calendarios de vacunación de tus mascotas.
           </p>
         </li>
-
         <li class="card-large card-dark" id="sup-cat">
           <h2 class="card-title">Tratamientos</h2>
           <div class="lottie-container3">
@@ -41,7 +40,6 @@
             de alimentación.
           </p>
         </li>
-
         <li class="card-large card-dark" id="sup-bird">
           <h2 class="card-title1">Vacunas</h2>
           <div class="lottie-container4">
@@ -52,7 +50,6 @@
             citas médicas y vacunaciones.
           </p>
         </li>
-
         <li class="card-large card-light" id="sup-fish">
           <h2 class="card-title">Cirugías</h2>
           <div class="lottie-container5">
@@ -70,6 +67,7 @@
       <div class="contenedor-principal">
         <!-- Filtros -->
         <div class="filtros">
+          <!-- Filtros -->
           <div class="filtro">
             <label>Ver registro de:</label>
             <select v-model="selectedPet" class="custom-select">
@@ -79,7 +77,6 @@
               </option>
             </select>
           </div>
-
           <div class="filtro">
             <label>Agrupar por:</label>
             <select v-model="selectedCategory" class="custom-select">
@@ -87,7 +84,6 @@
               <option v-for="categoria in categorias" :key="categoria">{{ categoria }}</option>
             </select>
           </div>
-
           <div class="filtro">
             <label>Fecha:</label>
             <div class="fecha-opciones">
@@ -110,11 +106,6 @@
               />
             </div>
           </div>
-
-          <!-- Animación de Lottie -->
-          <div class="lottie-container">
-            <div ref="lottieAnimation" class="lottie-animation"></div>
-          </div>
         </div>
 
         <!-- Tabla de actividades -->
@@ -130,7 +121,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="actividad in filteredActivities" :key="actividad.id_salud">
+              <tr v-for="actividad in paginatedActivities" :key="actividad.id_salud">
                 <td>{{ actividad.id_salud }}</td>
                 <td>{{ actividad.mascota }}</td>
                 <td>{{ actividad.fecha }}</td>
@@ -148,6 +139,35 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination-container">
+          <ul class="pagination">
+            <li
+              class="page-item"
+              :class="{ disabled: currentPage === 1 }"
+              @click="changePage(currentPage - 1)"
+            >
+              <a class="page-link page-prev">«</a>
+            </li>
+            <li
+              v-for="page in totalPages"
+              :key="page"
+              class="page-item"
+              :class="{ active: currentPage === page }"
+              @click="changePage(page)"
+            >
+              <a class="page-link">{{ page }}</a>
+            </li>
+            <li
+              class="page-item"
+              :class="{ disabled: currentPage === totalPages }"
+              @click="changePage(currentPage + 1)"
+            >
+              <a class="page-link page-next">»</a>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -189,7 +209,35 @@ export default {
       filterDate: { dia: false, mes: false, año: true },
       mascotas: [],
       categorias: [],
-      actividades: []
+      actividades: [],
+      currentPage: 1, // Página actual
+      itemsPerPage: 5 // Número de registros por página
+    }
+  },
+  computed: {
+    filteredActivities() {
+      return this.actividades.filter((actividad) => {
+        // Verifica que los campos necesarios existen
+        if (!actividad.mascota || !actividad.fecha || !actividad.tipo) {
+          console.warn('Actividad incompleta:', actividad)
+          return false
+        }
+
+        const matchPet = this.selectedPet === '' || actividad.mascota === this.selectedPet
+        const matchCategory =
+          this.selectedCategory === '' || actividad.tipo === this.selectedCategory
+        const matchYear = !this.filterDate.año || actividad.fecha.includes(this.selectedYear)
+
+        return matchPet && matchCategory && matchYear
+      })
+    },
+    paginatedActivities() {
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage
+      const endIndex = startIndex + this.itemsPerPage
+      return this.filteredActivities.slice(startIndex, endIndex)
+    },
+    totalPages() {
+      return Math.ceil(this.filteredActivities.length / this.itemsPerPage)
     }
   },
   methods: {
@@ -204,7 +252,6 @@ export default {
       this.actividades.unshift(nuevoRegistro) // Añadir el nuevo registro al inicio
       this.isRegisterSaludPopupVisible = false // Cerrar el popup
     },
-
     async fetchRegistrosSalud() {
       try {
         const usuarioId = localStorage.getItem('Usuario_id_usuario')
@@ -237,24 +284,11 @@ export default {
         console.error('Error al cargar categorías:', error)
         alert('No se pudieron cargar las categorías. Intenta nuevamente.')
       }
-    }
-  },
-  computed: {
-    filteredActivities() {
-      return this.actividades.filter((actividad) => {
-        // Verifica que los campos necesarios existen
-        if (!actividad.mascota || !actividad.fecha || !actividad.tipo) {
-          console.warn('Actividad incompleta:', actividad)
-          return false
-        }
-
-        const matchPet = this.selectedPet === '' || actividad.mascota === this.selectedPet
-        const matchCategory =
-          this.selectedCategory === '' || actividad.tipo === this.selectedCategory
-        const matchYear = !this.filterDate.año || actividad.fecha.includes(this.selectedYear)
-
-        return matchPet && matchCategory && matchYear
-      })
+    },
+    changePage(pageNumber) {
+      if (pageNumber >= 1 && pageNumber <= this.totalPages) {
+        this.currentPage = pageNumber
+      }
     }
   },
   mounted() {
@@ -486,7 +520,9 @@ h2 {
 }
 .tabla-actividades {
   flex: 2;
-  overflow-x: auto;
+  max-height: 300px; /* Ajusta la altura máxima */
+  overflow-y: auto; /* Scroll vertical */
+  overflow-x: auto; /* Scroll horizontal si es necesario */
   padding: 20px;
   background-color: rgba(255, 255, 255, 0.47);
   border-radius: 15px;
@@ -792,5 +828,72 @@ button {
   margin-top: 5px;
   line-height: 1.5;
   padding: 0 10px;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.page-item {
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.page-item.disabled .page-link {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.page-link {
+  padding: 8px 12px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #263d42;
+  text-align: center;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.page-link:hover {
+  background-color: #8e6c88 !important;
+  color: white !important;
+}
+
+.page-item.active .page-link {
+  background-color: #8e6c88 !important;
+  color: white !important;
+  border: 1px solid #8e6c88 !important;
+}
+
+.page-prev,
+.page-next {
+  display: inline-block;
+  padding: 8px 12px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #80ced7;
+  text-align: center;
+  cursor: pointer;
+}
+
+.page-prev:hover,
+.page-next:hover {
+  background-color: #8e6c88 !important;
+  color: white !important;
 }
 </style>
