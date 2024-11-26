@@ -72,6 +72,8 @@
     <!-- Componente de Notificación -->
     <NotificationPopup
       v-if="isNotificationPopupVisible"
+      :mascota-id="appointmentData.mascota" 
+      :actividad-id="actividadId" 
       @close="closeNotificationPopup"
       @saveNotification="handleSaveNotification"
     />
@@ -87,6 +89,12 @@ import Swal from 'sweetalert2'
 export default {
   components: {
     NotificationPopup
+  },
+  props: {
+    actividadId: {
+      type: Number,
+      required: true
+    }
   },
   data() {
     return {
@@ -185,15 +193,20 @@ export default {
       return !this.errors.mascota && !this.errors.descripcion && !this.errors.fecha_hora
     },
     openNotificationPopup() {
-      this.isNotificationPopupVisible = true
+      this.isNotificationPopupVisible = true;
     },
+    methods: {
+      handleSaveNotification(notificationData) {
+  notificationData.Actividad_id_actividad = this.actividadId; // Prop recibida
+  notificationData.mascota_id_mascota = this.appointmentData.mascota; // Mascota seleccionada
+  console.log("Datos de notificación guardados:", notificationData);
+  this.notificationData = notificationData;
+  this.closeNotificationPopup();
+}
+
+},
     closeNotificationPopup() {
-      this.isNotificationPopupVisible = false
-    },
-    handleSaveNotification(notificationData) {
-      this.notificationData = notificationData
-      console.log('Datos de notificación guardados:', notificationData)
-      this.closeNotificationPopup()
+      this.isNotificationPopupVisible = false;
     },
     closePopup() {
       this.$emit('close')
