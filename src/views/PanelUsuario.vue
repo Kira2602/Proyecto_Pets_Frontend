@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="redirectToSalud">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/perro.png" alt="Salud" />
@@ -125,18 +125,26 @@
     <!-- Popup de registrar cita medica -->
     <RegisterMedicalAppointmentPopup
       v-if="isMedicalAppointmentPopupVisible"
+      :actividad-id="actividadSeleccionada"
       @close="isMedicalAppointmentPopupVisible = false"
     />
 
     <!-- Popup de registrar paseo -->
-    <RegisterWalkPopup v-if="isWalkPopupVisible" @close="isWalkPopupVisible = false" />
+    <RegisterWalkPopup 
+    v-if="isWalkPopupVisible" 
+    :actividad-id="actividadSeleccionada"
+    @close="isWalkPopupVisible = false" />
 
     <!-- Popup de registrar comida -->
-    <RegisterFoodPopup v-if="isFoodPopupVisible" @close="isFoodPopupVisible = false" />
+    <RegisterFoodPopup 
+    v-if="isFoodPopupVisible" 
+    :actividad-id="actividadSeleccionada"
+    @close="isFoodPopupVisible = false" />
 
     <!-- Popup de registrar otra actividad -->
     <RegisterOtherActivityPopup
       v-if="isOtherActivityPopupVisible"
+      :actividad-id="actividadSeleccionada"
       @close="isOtherActivityPopupVisible = false"
     />
   </div>
@@ -174,7 +182,9 @@ export default {
       isFoodPopupVisible: false,
       isOtherActivityPopupVisible: false,
       usuarioId: null, // ID del usuario almacenado
-      nombreUsuario: localStorage.getItem('nombre') || '' // Inicializar con el nombre almacenado
+      nombreUsuario: localStorage.getItem('nombre') || '', // Inicializar con el nombre almacenado
+      actividadSeleccionada: null // ID de la actividad seleccionada
+
     }
   },
   methods: {
@@ -195,27 +205,45 @@ export default {
       }
     },
     openMedicalAppointmentPopup() {
+      this.actividadSeleccionada = 1;
+      console.log("Actividad seleccionada:", this.actividadSeleccionada);
+
       this.isMedicalAppointmentPopupVisible = true
     },
     openWalkPopup() {
+      this.actividadSeleccionada = 2; // ID de actividad para "Paseo"
+      console.log("Actividad seleccionada:", this.actividadSeleccionada);
+
       this.isWalkPopupVisible = true
     },
     openFoodPopup() {
+      this.actividadSeleccionada = 3; // ID de actividad para "Comida"
+      console.log("Actividad seleccionada:", this.actividadSeleccionada);
+
       this.isFoodPopupVisible = true
     },
     openOtherActivityPopup() {
+      this.actividadSeleccionada = 4; // ID de actividad para "Otras actividades"
+      console.log("Actividad seleccionada:", this.actividadSeleccionada);
+
       this.isOtherActivityPopupVisible = true
     },
     redirectToMisMascotas() {
-      // Redirigir a la vista de mis-mascotas
       this.$router.push({ name: 'mis-mascotas' })
+    },
+    redirectToSalud() {
+      this.$router.push({ name: 'salud' })
     },
     redirectToHistorialActividades() {
       this.$router.push({ name: 'historial-actividades' })
     },
     actualizarNombreUsuario(datos) {
       this.nombreUsuario = datos.nombre // Actualizar el nombre del usuario después de editarlo
-    }
+    },
+    redirectToSalud() {
+      // Redirigir a la vista de mis-mascotas
+      this.$router.push({ name: 'salud' })
+    },
   },
   mounted() {
     this.usuarioId = localStorage.getItem('Usuario_id_usuario')
