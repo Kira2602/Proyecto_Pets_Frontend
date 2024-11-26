@@ -51,3 +51,7 @@ npm install sweetalert2
 ```sh
 npm install lottie-web
 ```
+### Extension de paginacion 
+```sh
+npm install vue3-pagination
+```

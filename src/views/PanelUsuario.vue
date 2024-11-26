@@ -243,7 +243,7 @@ export default {
     redirectToSalud() {
       // Redirigir a la vista de mis-mascotas
       this.$router.push({ name: 'salud' })
-    },
+    }
   },
   mounted() {
     this.usuarioId = localStorage.getItem('Usuario_id_usuario')
