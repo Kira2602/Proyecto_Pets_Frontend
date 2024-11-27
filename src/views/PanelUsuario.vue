@@ -240,10 +240,7 @@ export default {
     actualizarNombreUsuario(datos) {
       this.nombreUsuario = datos.nombre // Actualizar el nombre del usuario después de editarlo
     },
-    redirectToSalud() {
-      // Redirigir a la vista de mis-mascotas
-      this.$router.push({ name: 'salud' })
-    }
+    
   },
   mounted() {
     this.usuarioId = localStorage.getItem('Usuario_id_usuario')

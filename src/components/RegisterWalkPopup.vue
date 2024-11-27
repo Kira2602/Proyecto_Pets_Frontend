@@ -1,6 +1,6 @@
 <template>
   <div class="walk-popup">
-    <div class="popup-wrapper">
+    <div class="popup-wrapper" v-if="isPopupVisible">
       <button class="close-btn" @click="closePopup">×</button>
       <div class="popup-content">
         <h2>Nuevo Paseo</h2>
@@ -20,7 +20,7 @@
               required
             >
               <option disabled value="">Selecciona una mascota</option>
-              <option v-for="mascota in mascotas" :key="mascota.id" :value="mascota.nombre">
+              <option v-for="mascota in mascotas" :key="mascota.id_mascota" :value="mascota.id_mascota">
                 {{ mascota.nombre }}
               </option>
             </select>
@@ -60,10 +60,11 @@
             </button>
           </div>
 
-          <button type="submit" class="register-btn">Registrar</button>
+          <button type="submit" class="register-btn">Registrar Paseo</button>
         </form>
       </div>
     </div>
+
     <!-- Componente de Notificación -->
     <NotificationPopup
       v-if="isNotificationPopupVisible"
@@ -76,6 +77,8 @@
 <script>
 import lottie from 'lottie-web'
 import NotificationPopup from '@/components/NotificationPopup.vue'
+import axios from 'axios'
+import Swal from 'sweetalert2'
 
 export default {
   components: {
@@ -83,6 +86,7 @@ export default {
   },
   data() {
     return {
+      isPopupVisible: Boolean,  // Controla la visibilidad del popup
       isNotificationPopupVisible: false,
       walkData: {
         mascota: '',
@@ -95,20 +99,75 @@ export default {
         descripcion: '',
         fecha_hora: ''
       },
-      mascotas: [
-        { id: 1, nombre: 'Lulu' },
-        { id: 2, nombre: 'Max' },
-        { id: 3, nombre: 'Bella' }
-      ]
+      mascotas: []
     }
   },
   methods: {
-    closePopup() {
-      this.$emit('close')
+    async fetchMascotas() {
+      const usuarioId = localStorage.getItem('Usuario_id_usuario')
+      if (!usuarioId) {
+        this.$router.push('/login')
+        return
+      }
+
+      try {
+        const response = await axios.get(`http://127.0.0.1:5000/mascota/mis-mascotas?Usuario_id_usuario=${usuarioId}`)
+        this.mascotas = response.data
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al obtener las mascotas',
+          confirmButtonColor: '#9d8189'
+        })
+      }
     },
+    // Método para registrar el paseo
+    async registerWalk() {
+      if (this.validateAllFields()) {
+        try {
+          const response = await axios.post('http://127.0.0.1:5000/actividad/paseo', {
+            Mascota_id_mascota: this.walkData.mascota,
+            descripcion: this.walkData.descripcion,
+            fecha_hora: this.walkData.fecha_hora
+          })
+
+          if (response.status === 201) {
+            console.log('Paseo registrado:', response.data)
+            Swal.fire({
+              icon: 'success',
+              title: 'Registro Exitoso',
+              text: 'El paseo ha sido registrado correctamente.',
+              confirmButtonColor: '#9d8189',
+              customClass: {
+                popup: 'swal-popup'}
+            }).then(() => {
+              this.closePopup(); // Cierra el popup después de mostrar la alerta
+            });
+          }
+        } catch (error) {
+          console.error('Error al registrar el paseo:', error)
+          alert('Error al registrar el paseo')
+        }
+      }else {
+        console.error('Error en los datos del formulario')
+      }
+    },
+    // Método para abrir el popup
+    openPopup() {
+      this.isPopupVisible = true;
+      console.log('Popup abierto:', this.isPopupVisible);
+    },
+
+    // Método para cerrar el popup
+    closePopup() {
+      this.$emit('close');
+      console.log('Popup cerrado:', this.isPopupVisible);
+    },
+
+    // Método para validar los campos
     validateField(field) {
       this.errors[field] = ''
-
       if (field === 'mascota' && !this.walkData.mascota) {
         this.errors.mascota = 'Por favor selecciona una mascota'
       }
@@ -119,6 +178,8 @@ export default {
         this.errors.fecha_hora = 'Por favor selecciona una fecha y hora'
       }
     },
+
+    // Validar todos los campos
     validateAllFields() {
       this.validateField('mascota')
       this.validateField('descripcion')
@@ -126,44 +187,49 @@ export default {
 
       return !this.errors.mascota && !this.errors.descripcion && !this.errors.fecha_hora
     },
+
+    // Método para abrir el popup de notificación
     openNotificationPopup() {
       this.isNotificationPopupVisible = true
     },
+
+    // Método para cerrar el popup de notificación
     closeNotificationPopup() {
       this.isNotificationPopupVisible = false
     },
+
+    // Manejar la notificación guardada
     handleSaveNotification(notificationData) {
       this.notificationData = notificationData
       console.log('Datos de notificación guardados:', notificationData)
       this.closeNotificationPopup()
     },
-    registerWalk() {
-      if (this.validateAllFields()) {
-        console.log('Datos del paseo:', this.walkData)
-        this.closePopup()
-      } else {
-        console.error('Error en los datos del formulario')
-      }
-    }
+    
+
+    
   },
   mounted() {
-    if (this.$refs.lottieContainer) {
-      lottie.loadAnimation({
-        container: this.$refs.lottieContainer,
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        path: 'https://lottie.host/d8a49d66-645e-46c5-b2a7-d10e394dd9b7/dhVJsZLDrH.json'
-      })
-    } else {
-      console.error('El contenedor de Lottie no se ha montado correctamente.')
-    }
+    this.fetchMascotas(); 
+    // Cargar la animación de Lottie en el contenedor
+    lottie.loadAnimation({
+      container: this.$refs.lottieContainer,
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: 'https://lottie.host/d8a49d66-645e-46c5-b2a7-d10e394dd9b7/dhVJsZLDrH.json' // URL de la animación Lottie para Paseo
+    })
   }
 }
 </script>
 
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+
+.swal-popup {
+  z-index: 2000 !important; /* Asegúrate de que sea más alto que el de tu modal */
+}
 
 .walk-popup {
   position: fixed;
@@ -175,8 +241,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 999;
   font-family: 'Poppins', sans-serif;
+  border: 2px solid red; /* Borde de prueba */
 }
 
 .popup-wrapper {
