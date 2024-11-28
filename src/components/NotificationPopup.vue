@@ -183,33 +183,45 @@
 
 <script>
 import lottie from 'lottie-web'
+import axios from 'axios'; // Asegúrate de importar axios
 
 export default {
+  props: {
+    mascotaId: {
+      type: Number,
+      required: true, // El id_mascota debe ser obligatorio
+    },
+    actividadId: {
+    type: Number,
+    required: true // ID de la actividad seleccionada
+  }
+  },
   data() {
     return {
       step: 1,
       notification: {
-        type: 'once',
-        interval: 1,
-        unit: 'hours',
-        startDateTime: '',
-        endDateTime: '',
-        description: 'Llevar a revisar su patita'
+        type: "once", // "once" o "repeat"
+        mensaje: "",
+        interval: null,
+        unit: null,
+        startDateTime: "",
+        endDateTime: null, // solo si es repeat
       },
       reminder: {
-        type: 'onTime',
-        amount: 1,
-        unit: 'day',
-        time: '12:00'
+        type: "onTime", // "onTime" o "before"
+        amount: null, // solo si es "before"
+        unit: null, // solo si es "before"
+        time: null, // solo si es "before"
       },
       errors: {
-        interval: '',
-        startDateTime: '',
-        endDateTime: '',
-        amount: '',
-        time: ''
-      }
-    }
+        mensaje: "",
+        interval: "",
+        startDateTime: "",
+        endDateTime: "",
+        amount: "",
+        time: "",
+      },
+    };
   },
   mounted() {
     this.loadLottieAnimation(
@@ -222,31 +234,25 @@ export default {
       this.$emit('close')
     },
     validateStep1() {
-      // Reiniciar errores
-      this.errors = { mensaje: '', interval: '', startDateTime: '', endDateTime: '' };
+      this.errors = { mensaje: "", startDateTime: "", interval: "", endDateTime: "" };
 
-      // Validar campos comunes (aplicables para ambos casos)
       if (!this.notification.mensaje) {
-        this.errors.mensaje = 'La descripción es obligatoria';
+        this.errors.mensaje = "El mensaje es obligatorio.";
       }
       if (!this.notification.startDateTime) {
-        this.errors.startDateTime = 'La fecha y hora de inicio es obligatoria';
+        this.errors.startDateTime = "La fecha de inicio es obligatoria.";
       }
-
-      // Validar campos específicos para "Repetir"
-      if (this.notification.type === 'repeat') {
+      if (this.notification.type === "repeat") {
         if (!this.notification.interval || this.notification.interval <= 0) {
-          this.errors.interval = 'El intervalo debe ser mayor a 0';
+          this.errors.interval = "El intervalo debe ser mayor a 0.";
         }
         if (!this.notification.endDateTime) {
-          this.errors.endDateTime = 'La fecha y hora de finalización es obligatoria';
+          this.errors.endDateTime = "La fecha de finalización es obligatoria.";
         }
       }
 
-      // Comprobar si no hay errores
-      const hasErrors = Object.values(this.errors).some((error) => error);
-      if (!hasErrors) {
-        this.step++; // Avanzar al siguiente paso
+      if (!Object.values(this.errors).some((error) => error)) {
+        this.step++;
         setTimeout(() => {
           this.loadLottieAnimation(
             this.$refs.lottieCatIcon2,
@@ -257,31 +263,54 @@ export default {
     },
 
     validateStep2() {
-  // Reiniciar errores
-  this.errors = { amount: '', time: '' };
+      this.errors = { amount: "", time: "" };
 
-      // Validar solo si se selecciona "Antes de"
-      if (this.reminder.type === 'before') {
-        if (!this.reminder.amount || this.reminder.amount <= 0) {
-          this.errors.amount = 'La cantidad debe ser mayor a 0';
-        }
-        if (!this.reminder.time) {
-          this.errors.time = 'La hora es obligatoria';
-        }
-      }
-
-      // Comprobar si no hay errores
-      const hasErrors = Object.values(this.errors).some((error) => error);
-      if (!hasErrors) {
-        this.step++; // Avanzar al siguiente paso
+if (this.reminder.type === "before") {
+  if (!this.reminder.amount || this.reminder.amount <= 0) {
+    this.errors.amount = "La cantidad debe ser mayor a 0.";
+  }
+  if (!this.reminder.time) {
+    this.errors.time = "La hora es obligatoria.";
+  }
+}
+if (!Object.values(this.errors).some((error) => error)) {
+        this.step++;
       }
     },
 
-    saveNotification() {
-      const notificationData = { ...this.notification, ...this.reminder }
-      this.$emit('saveNotification', notificationData)
-      this.closePopup()
-    },
+    async saveNotification() {
+  const data = {
+    mensaje: this.notification.mensaje,
+    fecha_inicio: this.notification.startDateTime,
+    fecha_fin: this.notification.type === "repeat" ? this.notification.endDateTime : null,
+    intervalo: this.notification.type === "repeat" ? this.notification.interval : null,
+    unidad_intervalo: this.notification.type === "repeat" ? this.notification.unit : null,
+    recordatorio_tipo: this.reminder.type,
+    recordatorio_cantidad: this.reminder.type === "before" ? this.reminder.amount : null,
+    recordatorio_hora: this.reminder.type === "before" ? this.reminder.time : null,
+    Actividad_id_actividad: this.actividadId,
+    Usuario_id_usuario: localStorage.getItem("Usuario_id_usuario"),
+  };
+
+  console.log("Payload enviado al backend:", data);
+
+  try {
+    const response = await axios.post(
+      "http://127.0.0.1:5000/notificacion/postNotificacion",
+      data
+    );
+    if (response.status === 201) {
+      alert("Notificación registrada exitosamente.");
+      this.closePopup();
+    }
+  } catch (error) {
+    console.error("Error al registrar la notificación:", error);
+    alert("Error al registrar la notificación. Por favor, intenta de nuevo.");
+  }
+},
+
+
+
     loadLottieAnimation(container, path) {
       lottie.destroy()
       lottie.loadAnimation({
