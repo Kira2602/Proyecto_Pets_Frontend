@@ -104,7 +104,7 @@ export default {
         fecha_hora: ''
       },
       mascotas: [],
-      minDate: new Date().toISOString().slice(0, 16)
+      minDate: `${new Date().toISOString().split('T')[0]}T00:00`
     }
   },
   methods: {
