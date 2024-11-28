@@ -61,7 +61,7 @@
 
           <div class="form-group notification-group">
             <label>Agregar notificación:</label>
-            <button type="button" class="notification-btn" @click="openNotificationPopup">
+            <button type="button" class="notification-btn" @click="handleNotificationClick">
               🔔
             </button>
           </div>
@@ -73,12 +73,13 @@
 
     <!-- Componente de Notificación -->
     <NotificationPopup
-      v-if="isNotificationPopupVisible"
-      :mascota-id="appointmentData.mascota"
-      :actividad-id="actividadId"
-      @close="closeNotificationPopup"
-      @saveNotification="handleSaveNotification"
-    />
+  v-if="isNotificationPopupVisible"
+  :mascota-id="appointmentData.mascota"
+  :actividad-id="actividadId" 
+  @close="closeNotificationPopup"
+  @saveNotification="handleSaveNotification"
+/>
+
   </div>
 </template>
 
@@ -101,6 +102,7 @@ export default {
   data() {
     return {
       isNotificationPopupVisible: false,
+      actividadId: null,
       //usuario_id: 1, // Cambia esto por el ID real del usuario
       appointmentData: {
         mascota: '',
@@ -215,21 +217,70 @@ export default {
     openNotificationPopup() {
       this.isNotificationPopupVisible = true
     },
-    methods: {
-      handleSaveNotification(notificationData) {
-        notificationData.Actividad_id_actividad = this.actividadId // Prop recibida
-        notificationData.mascota_id_mascota = this.appointmentData.mascota // Mascota seleccionada
-        console.log('Datos de notificación guardados:', notificationData)
-        this.notificationData = notificationData
-        this.closeNotificationPopup()
+  async handleNotificationClick() {
+    const result = await Swal.fire({
+      title: "¿Desea registrar la actividad y agregar una notificación?",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+      cancelButtonText: "No",
+      confirmButtonColor: "#9d8189"
+    });
+
+    if (result.isConfirmed) {
+      this.registerAndOpenNotification();
+    }
+  },
+  async registerAndOpenNotification() {
+    if (this.validateAllFields()) {
+      try {
+        // Registrar la actividad
+        const response = await axios.post("http://127.0.0.1:5000/actividad/citas", {
+          Mascota_id_mascota: this.appointmentData.mascota,
+          descripcion: this.appointmentData.descripcion,
+          fecha_hora: this.appointmentData.fecha_hora
+        });
+
+        if (response.status === 201) {
+          console.log("Cita médica registrada:", response.data);
+          this.actividadId = response.data.id_actividad; // Actualizar actividadId correctamente
+
+          Swal.fire({
+            icon: "success",
+            title: "Actividad Registrada",
+            text: "La actividad ha sido registrada correctamente.",
+            confirmButtonColor: "#9d8189"
+          });
+          this.isNotificationPopupVisible = true;
+
+        }
+      } catch (error) {
+        console.error("Error al registrar la actividad:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al registrar la actividad. Inténtalo de nuevo.",
+          confirmButtonColor: "#9d8189"
+        });
       }
-    },
+    } else {
+      console.error("Error en los datos del formulario");
+    }
+  },
+
+
+      handleSaveNotification(notificationData) {
+  notificationData.Actividad_id_actividad = this.actividadId; // Prop recibida
+  notificationData.mascota_id_mascota = this.appointmentData.mascota; // Mascota seleccionada
+  console.log("Datos de notificación guardados:", notificationData);
+  this.notificationData = notificationData;
+  this.closeNotificationPopup();
+},
     closeNotificationPopup() {
       this.isNotificationPopupVisible = false
     },
     closePopup() {
       this.$emit('close')
-    }
+    },
   },
   mounted() {
     this.fetchMascotas() // Llama a fetchMascotas cuando el componente se monta
@@ -247,6 +298,7 @@ export default {
     }
   }
 }
+
 </script>
 
 <style scoped>

@@ -61,7 +61,7 @@
 
           <div class="form-group notification-group">
             <label>Agregar notificación:</label>
-            <button type="button" class="notification-btn" @click="openNotificationPopup">
+            <button type="button" class="notification-btn" @click="handleNotificationClick">
               🔔
             </button>
           </div>
@@ -74,6 +74,8 @@
     <!-- Componente de Notificación -->
     <NotificationPopup
       v-if="isNotificationPopupVisible"
+      :mascota-id="walkData.mascota"
+      :actividad-id="actividadId" 
       @close="closeNotificationPopup"
       @saveNotification="handleSaveNotification"
     />
@@ -94,6 +96,7 @@ export default {
     return {
       isPopupVisible: Boolean, // Controla la visibilidad del popup
       isNotificationPopupVisible: false,
+      actividadId: null,
       walkData: {
         mascota: '',
         descripcion: '',
@@ -220,17 +223,75 @@ export default {
       this.isNotificationPopupVisible = true
     },
 
+    async handleNotificationClick() {
+    const result = await Swal.fire({
+      title: "¿Desea registrar la actividad y agregar una notificación?",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+      cancelButtonText: "No",
+      confirmButtonColor: "#9d8189"
+    });
+
+    if (result.isConfirmed) {
+      this.registerAndOpenNotification();
+    }
+  },
+  async registerAndOpenNotification() {
+    if (this.validateAllFields()) {
+      try {
+        // Registrar la actividad
+        const response = await axios.post("http://127.0.0.1:5000/actividad/paseo", {
+          Mascota_id_mascota: this.walkData.mascota,
+          descripcion: this.walkData.descripcion,
+          fecha_hora: this.walkData.fecha_hora
+        });
+
+        if (response.status === 201) {
+          console.log("paseo registrada:", response.data);
+          this.actividadId = response.data.id_actividad; // Actualizar actividadId correctamente
+
+          Swal.fire({
+            icon: "success",
+            title: "Actividad Registrada",
+            text: "La actividad ha sido registrada correctamente.",
+            confirmButtonColor: "#9d8189"
+          });
+          this.isNotificationPopupVisible = true;
+
+        }
+      } catch (error) {
+        console.error("Error al registrar la actividad:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al registrar la actividad. Inténtalo de nuevo.",
+          confirmButtonColor: "#9d8189"
+        });
+      }
+    } else {
+      console.error("Error en los datos del formulario");
+    }
+  },
+
+
+
+
     // Método para cerrar el popup de notificación
     closeNotificationPopup() {
       this.isNotificationPopupVisible = false
     },
 
-    // Manejar la notificación guardada
+   
     handleSaveNotification(notificationData) {
-      this.notificationData = notificationData
-      console.log('Datos de notificación guardados:', notificationData)
-      this.closeNotificationPopup()
-    }
+    notificationData.Actividad_id_actividad = this.actividadId; // Prop recibida
+    notificationData.mascota_id_mascota = this.walkData.mascota; // Mascota seleccionada
+    console.log("Datos de notificación guardados:", notificationData);
+    this.notificationData = notificationData;
+    this.closeNotificationPopup();
+    },
+    
+
+    
   },
   mounted() {
     this.fetchMascotas()

@@ -61,7 +61,7 @@
 
           <div class="form-group notification-group">
             <label>Agregar notificación:</label>
-            <button type="button" class="notification-btn" @click="openNotificationPopup">
+            <button type="button" class="notification-btn" @click="handleNotificationClick">
               🔔
             </button>
           </div>
@@ -74,6 +74,8 @@
     <!-- Componente de Notificación -->
     <NotificationPopup
       v-if="isNotificationPopupVisible"
+      :mascota-id="foodData.mascota"
+      :actividad-id="actividadId" 
       @close="closeNotificationPopup"
       @saveNotification="handleSaveNotification"
     />
@@ -206,14 +208,71 @@ export default {
     openNotificationPopup() {
       this.isNotificationPopupVisible = true
     },
+    async handleNotificationClick() {
+    const result = await Swal.fire({
+      title: "¿Desea registrar la actividad y agregar una notificación?",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+      cancelButtonText: "No",
+      confirmButtonColor: "#9d8189"
+    });
+
+    if (result.isConfirmed) {
+      this.registerAndOpenNotification();
+    }
+  },
+  async registerAndOpenNotification() {
+    if (this.validateAllFields()) {
+      try {
+        // Registrar la actividad
+        const response = await axios.post("http://127.0.0.1:5000/actividad/comida", {
+          Mascota_id_mascota: this.foodData.mascota,
+          descripcion: this.foodData.descripcion,
+          fecha_hora: this.foodData.fecha_hora
+        });
+
+        if (response.status === 201) {
+          console.log("comida registrada:", response.data);
+          this.actividadId = response.data.id_actividad; // Actualizar actividadId correctamente
+
+          Swal.fire({
+            icon: "success",
+            title: "Actividad Registrada",
+            text: "La actividad ha sido registrada correctamente.",
+            confirmButtonColor: "#9d8189"
+          });
+          this.isNotificationPopupVisible = true;
+
+        }
+      } catch (error) {
+        console.error("Error al registrar la actividad:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al registrar la actividad. Inténtalo de nuevo.",
+          confirmButtonColor: "#9d8189"
+        });
+      }
+    } else {
+      console.error("Error en los datos del formulario");
+    }
+  },
+
+
+
+
     closeNotificationPopup() {
       this.isNotificationPopupVisible = false
     },
+
     handleSaveNotification(notificationData) {
-      this.notificationData = notificationData
-      console.log('Datos de notificación guardados:', notificationData)
-      this.closeNotificationPopup()
-    }
+    notificationData.Actividad_id_actividad = this.actividadId; // Prop recibida
+    notificationData.mascota_id_mascota = this.foodData.mascota; // Mascota seleccionada
+    console.log("Datos de notificación guardados:", notificationData);
+    this.notificationData = notificationData;
+    this.closeNotificationPopup();
+    },
+    
   },
   mounted() {
     this.fetchMascotas()
