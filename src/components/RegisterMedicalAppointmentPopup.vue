@@ -48,6 +48,8 @@
               <input
                 type="datetime-local"
                 v-model="appointmentData.fecha_hora"
+                :min="minDate"
+                @change="validateFechaHora"
                 @blur="validateField('fecha_hora')"
                 :class="{ 'error-border': errors.fecha_hora }"
                 required
@@ -72,6 +74,8 @@
     <!-- Componente de Notificación -->
     <NotificationPopup
       v-if="isNotificationPopupVisible"
+      :mascota-id="appointmentData.mascota"
+      :actividad-id="actividadId"
       @close="closeNotificationPopup"
       @saveNotification="handleSaveNotification"
     />
@@ -88,6 +92,12 @@ export default {
   components: {
     NotificationPopup
   },
+  props: {
+    actividadId: {
+      type: Number,
+      required: true
+    }
+  },
   data() {
     return {
       isNotificationPopupVisible: false,
@@ -103,7 +113,8 @@ export default {
         descripcion: '',
         fecha_hora: ''
       },
-      mascotas: [] // Inicialmente vacío
+      mascotas: [], // Inicialmente vacío
+      minDate: `${new Date().toISOString().split('T')[0]}T00:00`
     }
   },
   methods: {
@@ -164,6 +175,23 @@ export default {
         console.error('Error en los datos del formulario')
       }
     },
+    validateFechaHora() {
+      const now = new Date()
+      const selectedDate = new Date(this.appointmentData.fecha_hora)
+
+      if (selectedDate < now) {
+        this.errors.fecha_hora = 'No puedes seleccionar una fecha y hora pasada'
+        this.appointmentData.fecha_hora = '' // Limpia el campo
+        Swal.fire({
+          icon: 'warning',
+          title: 'Fecha inválida',
+          text: 'Por favor selecciona una fecha y hora actual o futura.',
+          confirmButtonColor: '#9d8189'
+        })
+      } else {
+        this.errors.fecha_hora = ''
+      }
+    },
     validateField(field) {
       this.errors[field] = ''
 
@@ -187,13 +215,17 @@ export default {
     openNotificationPopup() {
       this.isNotificationPopupVisible = true
     },
+    methods: {
+      handleSaveNotification(notificationData) {
+        notificationData.Actividad_id_actividad = this.actividadId // Prop recibida
+        notificationData.mascota_id_mascota = this.appointmentData.mascota // Mascota seleccionada
+        console.log('Datos de notificación guardados:', notificationData)
+        this.notificationData = notificationData
+        this.closeNotificationPopup()
+      }
+    },
     closeNotificationPopup() {
       this.isNotificationPopupVisible = false
-    },
-    handleSaveNotification(notificationData) {
-      this.notificationData = notificationData
-      console.log('Datos de notificación guardados:', notificationData)
-      this.closeNotificationPopup()
     },
     closePopup() {
       this.$emit('close')

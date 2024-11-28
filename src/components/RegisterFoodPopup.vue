@@ -20,7 +20,11 @@
               required
             >
               <option disabled value="">Selecciona una mascota</option>
-              <option v-for="mascota in mascotas" :key="mascota.id" :value="mascota.nombre">
+              <option
+                v-for="mascota in mascotas"
+                :key="mascota.id_mascota"
+                :value="mascota.id_mascota"
+              >
                 {{ mascota.nombre }}
               </option>
             </select>
@@ -44,6 +48,8 @@
               <input
                 type="datetime-local"
                 v-model="foodData.fecha_hora"
+                :min="minDate"
+                @change="validateFechaHora"
                 @blur="validateField('fecha_hora')"
                 :class="{ 'error-border': errors.fecha_hora }"
                 required
@@ -60,7 +66,7 @@
             </button>
           </div>
 
-          <button type="submit" class="register-btn">Registrar</button>
+          <button type="submit" class="register-btn">Registrar Comida</button>
         </form>
       </div>
     </div>
@@ -77,6 +83,8 @@
 <script>
 import lottie from 'lottie-web'
 import NotificationPopup from '@/components/NotificationPopup.vue'
+import axios from 'axios'
+import Swal from 'sweetalert2'
 
 export default {
   components: {
@@ -96,14 +104,82 @@ export default {
         descripcion: '',
         fecha_hora: ''
       },
-      mascotas: [
-        { id: 1, nombre: 'Lulu' },
-        { id: 2, nombre: 'Max' },
-        { id: 3, nombre: 'Bella' }
-      ]
+      mascotas: [],
+      minDate: `${new Date().toISOString().split('T')[0]}T00:00`
     }
   },
   methods: {
+    async fetchMascotas() {
+      const usuarioId = localStorage.getItem('Usuario_id_usuario')
+      if (!usuarioId) {
+        this.$router.push('/login')
+        return
+      }
+
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5000/mascota/mis-mascotas?Usuario_id_usuario=${usuarioId}`
+        )
+        this.mascotas = response.data
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al obtener las mascotas',
+          confirmButtonColor: '#9d8189'
+        })
+      }
+    },
+    validateFechaHora() {
+      const now = new Date()
+      const selectedDate = new Date(this.foodData.fecha_hora)
+
+      if (selectedDate < now) {
+        this.errors.fecha_hora = 'No puedes seleccionar una fecha y hora pasada'
+        this.foodData.fecha_hora = '' // Limpia el campo
+        Swal.fire({
+          icon: 'warning',
+          title: 'Fecha inválida',
+          text: 'Por favor selecciona una fecha y hora actual o futura.',
+          confirmButtonColor: '#9d8189'
+        })
+      } else {
+        this.errors.fecha_hora = ''
+      }
+    },
+    // Método para registrar la comida
+    async registerFood() {
+      if (this.validateAllFields()) {
+        try {
+          const response = await axios.post('http://127.0.0.1:5000/actividad/comida', {
+            Mascota_id_mascota: this.foodData.mascota,
+            descripcion: this.foodData.descripcion,
+            fecha_hora: this.foodData.fecha_hora
+          })
+
+          if (response.status === 201) {
+            console.log('Comida registrada:', response.data)
+            Swal.fire({
+              icon: 'success',
+              title: 'Registro Exitoso',
+              text: 'El paseo ha sido registrado correctamente.',
+              confirmButtonColor: '#9d8189',
+              customClass: {
+                popup: 'swal-popup'
+              }
+            }).then(() => {
+              this.closePopup() // Cierra el popup después de mostrar la alerta
+            })
+          }
+        } catch (error) {
+          console.error('Error al registrar la comida:', error)
+          alert('Error al registrar la comida')
+        }
+      } else {
+        console.error('Error en los datos del formulario')
+      }
+    },
+
     closePopup() {
       this.$emit('close')
     },
@@ -119,6 +195,14 @@ export default {
         this.errors.fecha_hora = 'Por favor selecciona una fecha y hora'
       }
     },
+    // Validar todos los campos
+    validateAllFields() {
+      this.validateField('mascota')
+      this.validateField('descripcion')
+      this.validateField('fecha_hora')
+
+      return !this.errors.mascota && !this.errors.descripcion && !this.errors.fecha_hora
+    },
     openNotificationPopup() {
       this.isNotificationPopupVisible = true
     },
@@ -129,15 +213,10 @@ export default {
       this.notificationData = notificationData
       console.log('Datos de notificación guardados:', notificationData)
       this.closeNotificationPopup()
-    },
-    registerFood() {
-      if (!this.errors.mascota && !this.errors.descripcion && !this.errors.fecha_hora) {
-        console.log('Datos de comida:', this.foodData)
-        this.closePopup()
-      }
     }
   },
   mounted() {
+    this.fetchMascotas()
     // Cargar la animación de Lottie en el contenedor
     lottie.loadAnimation({
       container: this.$refs.lottieContainer,
@@ -152,7 +231,9 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
+.swal-popup {
+  z-index: 2000 !important; /* Asegúrate de que sea más alto que el de tu modal */
+}
 .food-popup {
   position: fixed;
   top: 0;
@@ -163,7 +244,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 999;
   font-family: 'Poppins', sans-serif;
 }
 
