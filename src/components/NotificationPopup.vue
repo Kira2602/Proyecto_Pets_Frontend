@@ -27,37 +27,6 @@
           <span v-if="errors.mensaje" class="error-message">{{ errors.description }}</span>
         </div>
 
-        <!-- Mostrar solo si es "repetir" -->
-        <template v-if="notification.type === 'repeat'">
-          <div class="summary-row">
-            <label>Cada:</label>
-            <input
-              type="number"
-              v-model="notification.interval"
-              :class="{ 'error-border': errors.interval }"
-              min="1"
-              class="styled-input"
-            />
-            <select v-model="notification.unit" class="styled-select">
-              <option value="hours">Horas</option>
-              <option value="days">Días</option>
-            </select>
-            <span v-if="errors.interval" class="error-message">{{ errors.interval }}</span>
-          </div>
-
-          <div class="summary-row">
-            <label>Fecha y hora de finalización:</label>
-            <input
-              type="datetime-local"
-              v-model="notification.endDateTime"
-              :class="{ 'error-border': errors.endDateTime }"
-              class="styled-input"
-            />
-            <span v-if="errors.endDateTime" class="error-message">{{ errors.endDateTime }}</span>
-          </div>
-        </template>
-
-        <!-- Campo común para "fecha y hora de inicio" -->
         <div class="summary-row">
           <label>Fecha y hora de inicio:</label>
           <input
@@ -68,6 +37,41 @@
           />
           <span v-if="errors.startDateTime" class="error-message">{{ errors.startDateTime }}</span>
         </div>
+
+        <!-- Mostrar solo si es "repetir" -->
+        <template v-if="notification.type === 'repeat'">
+         
+          <div class="summary-row">
+            <label>Fecha y hora de finalización:</label>
+            <input
+              type="datetime-local"
+              v-model="notification.endDateTime"
+              :class="{ 'error-border': errors.endDateTime }"
+              class="styled-input"
+            />
+            <span v-if="errors.endDateTime" class="error-message">{{ errors.endDateTime }}</span>
+          </div>
+
+          <div class="summary-row">
+            <label>Cada:</label>
+            <input
+              type="number"
+              v-model="notification.interval"
+              :class="{ 'error-border': errors.interval }"
+              :max="getMaxInterval(notification.unit)"
+              min="1"
+              class="styled-input"
+            />
+            <select v-model="notification.unit" class="styled-select">
+              <option v-for="unit in maxIntervalInUnits" :key="unit" :value="unit">
+                {{ unit }}
+              </option>
+            </select>
+
+            <span v-if="errors.interval" class="error-message">{{ errors.interval }}</span>
+          </div>
+
+        </template>        
       </div>
 
         <button class="continue-btn" 
@@ -76,57 +80,12 @@
         Continuar</button>
       </div>
 
-      <div class="popup-content" v-if="step === 2">
-        <!-- Fase 2: Configuración de Recordatorio -->
-        <h2>Recordarme</h2>
-        <div ref="lottieCatIcon2" class="icon lottie-animation"></div>
-
-        <div class="radio-group">
-          <label><input type="radio" v-model="reminder.type" value="onTime" /> En la hora</label>
-          <label><input type="radio" v-model="reminder.type" value="before" /> Antes de</label>
-        </div>
-      <!-- Campos de configuración solo si se selecciona "Antes de" -->
-      <template v-if="reminder.type === 'before'">
-        <div class="config-container">
-          <div class="summary-row">
-            <label>Un:</label>
-            <input
-              type="number"
-              v-model="reminder.amount"
-              :class="{ 'error-border': errors.amount }"
-              min="1"
-              class="styled-input"
-            />
-            <select v-model="reminder.unit" class="styled-select">
-              <option value="hour">Hora</option>
-              <option value="day">Día</option>
-            </select>
-            <span v-if="errors.amount" class="error-message">{{ errors.amount }}</span>
-          </div>
-
-          <div class="summary-row">
-            <label>Hora:</label>
-            <input
-              type="time"
-              v-model="reminder.time"
-              :class="{ 'error-border': errors.time }"
-              class="styled-input"
-            />
-            <span v-if="errors.time" class="error-message">{{ errors.time }}</span>
-          </div>
-        </div>
-      </template>
-
-        <button class="continue-btn" @click="validateStep2">Continuar</button>
-      </div>
-
       <div class="popup-content" v-if="step === 3">
       <!-- Fase 3: Resumen -->
       <h2>Resumen</h2>
       <div class="summary-container">
         <!-- Campos comunes -->
         <div >
-      <label>'tipo actividad' para 'mascota seleccionada'</label>
     </div>
         <div class="summary-row">
           <label>mensaje de la notificacion:</label>
@@ -154,25 +113,6 @@
             <input type="text" :value="notification.endDateTime" class="styled-input" disabled />
           </div>
         </template>
-
-        <!-- Mostrar recordatorio -->
-        <div class="summary-row">
-          <label>Recordar:</label>
-          <input
-            type="text"
-            :value="reminder.type === 'onTime' ? 'En la hora' : `Antes de ${reminder.amount} ${reminder.unit}`"
-            class="styled-input"
-            disabled
-          />
-        </div>
-
-        <!-- Mostrar hora específica si es "Antes de" -->
-        <template v-if="reminder.type === 'before'">
-          <div class="summary-row">
-            <label>En la hora:</label>
-            <input type="time" v-model="reminder.time" class="styled-input" disabled />
-          </div>
-        </template>
       </div>
       <button class="save-btn" @click="saveNotification">Guardar</button>
     </div>
@@ -184,6 +124,7 @@
 <script>
 import lottie from 'lottie-web'
 import axios from 'axios'; // Asegúrate de importar axios
+import Swal from 'sweetalert2';
 
 export default {
   props: {
@@ -207,12 +148,7 @@ export default {
         startDateTime: "",
         endDateTime: null, // solo si es repeat
       },
-      reminder: {
-        type: "onTime", // "onTime" o "before"
-        amount: null, // solo si es "before"
-        unit: null, // solo si es "before"
-        time: null, // solo si es "before"
-      },
+     
       errors: {
         mensaje: "",
         interval: "",
@@ -223,93 +159,140 @@ export default {
       },
     };
   },
+
   mounted() {
     this.loadLottieAnimation(
       this.$refs.lottieCatIcon1,
       'https://lottie.host/ef30f82a-2bfb-4486-8455-de47a22a7083/1BJHTUXIld.json'
     )
   },
+
+
+  computed: {
+  maxIntervalInUnits() {
+    if (!this.notification.startDateTime || !this.notification.endDateTime) {
+      return []; // Si no hay fechas, no hay opciones
+    }
+
+    const start = new Date(this.notification.startDateTime);
+    const end = new Date(this.notification.endDateTime);
+    const maxInterval = this.calculateMaxInterval(start, end);
+
+    // Devuelve las opciones disponibles según el intervalo máximo
+    const units = ["minutos", "horas", "días", "semanas", "meses"];
+    const unitMapping = { minutos: 1, horas: 60, días: 1440, semanas: 10080, meses: 43200 };
+    return units.filter((unit) => {
+      const unitInMinutes = unitMapping[unit];
+      return unitInMinutes <= maxInterval.value * unitMapping[maxInterval.unit];
+    });
+  },
+},
+
   methods: {
+
+
+    getMaxInterval(unit) {
+      const maxValues = {
+        minutos: 59,
+        horas: 23,
+        días: 28,
+        meses: 11,
+      };
+      return maxValues[unit] || Infinity; // Devuelve infinito si la unidad no está definida
+    },
+    calculateMaxInterval(start, end) {
+      const diffInMilliseconds = end - start;
+      const diffInMinutes = diffInMilliseconds / (1000 * 60);
+      const diffInHours = diffInMinutes / 60;
+      const diffInDays = diffInHours / 24;
+      const diffInWeeks = diffInDays / 7;
+      const diffInMonths = diffInDays / 30;
+
+      if (diffInMonths >= 1) {
+        return { value: Math.floor(diffInMonths), unit: "meses" };
+      } else if (diffInWeeks >= 1) {
+        return { value: Math.floor(diffInWeeks), unit: "semanas" };
+      } else if (diffInDays >= 1) {
+        return { value: Math.floor(diffInDays), unit: "días" };
+      } else if (diffInHours >= 1) {
+        return { value: Math.floor(diffInHours), unit: "horas" };
+      } else {
+        return { value: Math.floor(diffInMinutes), unit: "minutos" };
+      }
+    },
     closePopup() {
       this.$emit('close')
     },
     validateStep1() {
       this.errors = { mensaje: "", startDateTime: "", interval: "", endDateTime: "" };
 
+      const now = new Date();
+      const start = new Date(this.notification.startDateTime);
+      const end = new Date(this.notification.endDateTime);
+
       if (!this.notification.mensaje) {
         this.errors.mensaje = "El mensaje es obligatorio.";
       }
       if (!this.notification.startDateTime) {
         this.errors.startDateTime = "La fecha de inicio es obligatoria.";
+      } else if (start < now) {
+        this.errors.startDateTime = "La fecha de inicio no puede ser anterior a la fecha actual.";
       }
+
       if (this.notification.type === "repeat") {
-        if (!this.notification.interval || this.notification.interval <= 0) {
-          this.errors.interval = "El intervalo debe ser mayor a 0.";
-        }
         if (!this.notification.endDateTime) {
           this.errors.endDateTime = "La fecha de finalización es obligatoria.";
+        } else if (end <= start) {
+          this.errors.endDateTime = "La fecha de finalización debe ser posterior a la fecha de inicio.";
+        }
+
+        const maxInterval = this.calculateMaxInterval(start, end);
+        if (!this.notification.interval || this.notification.interval <= 0) {
+          this.errors.interval = "El intervalo debe ser mayor a 0.";
+        } else if (!this.validateInterval(this.notification.interval, this.notification.unit, maxInterval)) {
+          this.errors.interval = `El intervalo máximo permitido es ${maxInterval.value} ${maxInterval.unit}.`;
         }
       }
 
       if (!Object.values(this.errors).some((error) => error)) {
-        this.step++;
-        setTimeout(() => {
-          this.loadLottieAnimation(
-            this.$refs.lottieCatIcon2,
-            'https://lottie.host/83c0af8f-8bdf-4dcb-8d7b-86c9a655e316/KhQBfssaOD.json'
-          );
-        }, 100);
+        this.step = 3;
       }
     },
-
-    validateStep2() {
-      this.errors = { amount: "", time: "" };
-
-if (this.reminder.type === "before") {
-  if (!this.reminder.amount || this.reminder.amount <= 0) {
-    this.errors.amount = "La cantidad debe ser mayor a 0.";
-  }
-  if (!this.reminder.time) {
-    this.errors.time = "La hora es obligatoria.";
-  }
-}
-if (!Object.values(this.errors).some((error) => error)) {
-        this.step++;
-      }
+    validateInterval(value, unit, maxInterval) {
+      const unitMapping = { minutos: 1, horas: 60, días: 1440, semanas: 10080, meses: 43200 };
+      const intervalInMinutes = value * unitMapping[unit];
+      const maxIntervalInMinutes = maxInterval.value * unitMapping[maxInterval.unit];
+      return intervalInMinutes <= maxIntervalInMinutes;
     },
-
-    async saveNotification() {
+   async saveNotification() {
   const data = {
     mensaje: this.notification.mensaje,
     fecha_inicio: this.notification.startDateTime,
     fecha_fin: this.notification.type === "repeat" ? this.notification.endDateTime : null,
     intervalo: this.notification.type === "repeat" ? this.notification.interval : null,
     unidad_intervalo: this.notification.type === "repeat" ? this.notification.unit : null,
-    recordatorio_tipo: this.reminder.type,
-    recordatorio_cantidad: this.reminder.type === "before" ? this.reminder.amount : null,
-    recordatorio_hora: this.reminder.type === "before" ? this.reminder.time : null,
     Actividad_id_actividad: this.actividadId,
     Usuario_id_usuario: localStorage.getItem("Usuario_id_usuario"),
+    type: this.notification.type // Asegúrate de incluir este campo
   };
 
-  console.log("Payload enviado al backend:", data);
-
   try {
-    const response = await axios.post(
-      "http://127.0.0.1:5000/notificacion/postNotificacion",
-      data
-    );
+    const response = await axios.post("http://127.0.0.1:5000/notificacion/postNotificacion", data);
     if (response.status === 201) {
-      alert("Notificación registrada exitosamente.");
-      this.closePopup();
+      Swal.fire({
+            icon: "success",
+            title: "Notificacion Registrada",
+            text: "tu notificacion ha sido registrada correctamente.",
+            confirmButtonColor: "#9d8189"
+          });
+          this.closePopup();
     }
   } catch (error) {
     console.error("Error al registrar la notificación:", error);
     alert("Error al registrar la notificación. Por favor, intenta de nuevo.");
   }
-},
-
-
+}
+,
 
     loadLottieAnimation(container, path) {
       lottie.destroy()
