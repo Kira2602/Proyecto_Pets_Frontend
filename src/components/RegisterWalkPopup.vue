@@ -109,7 +109,7 @@ export default {
         fecha_hora: ''
       },
       mascotas: [],
-      minDate: new Date().toISOString().slice(0, 16) // Fecha mínima en formato ISO
+      minDate: `${new Date().toISOString().split('T')[0]}T00:00`
     }
   },
   methods: {
@@ -326,7 +326,6 @@ export default {
   align-items: center;
   z-index: 999;
   font-family: 'Poppins', sans-serif;
-  border: 2px solid red; /* Borde de prueba */
 }
 
 .popup-wrapper {

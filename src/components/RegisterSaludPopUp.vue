@@ -119,6 +119,7 @@ export default {
     return {
       step: 1,
       mascotas: [],
+      minDate: new Date().toISOString().split('T')[0],
       tiposSalud: [],
       formData: {
         mascotaId: '',
@@ -132,8 +133,7 @@ export default {
         id_tipoSalud: '',
         descripcion: '',
         fecha: ''
-      },
-      minDate: new Date().toISOString().split('T')[0] // Fecha mínima permitida
+      }
     }
   },
   methods: {
@@ -167,10 +167,19 @@ export default {
       }
     },
     validateFecha() {
-      const today = new Date()
-      const selectedDate = new Date(this.formData.fecha)
+      if (!this.formData.fecha) {
+        this.errors.fecha = 'Por favor selecciona una fecha'
+        return
+      }
 
-      if (selectedDate < today) {
+      // Convertir la fecha de dd/mm/yyyy a yyyy-mm-dd
+      const [day, month, year] = this.formData.fecha.split('-') // Divide por guión
+      const formattedDate = new Date(`${year}-${month}-${day}`) // Convierte al formato yyyy-mm-dd
+
+      const today = new Date() // Fecha y hora actual
+      today.setHours(0, 0, 0, 0) // Elimina la hora para comparar solo fechas
+
+      if (formattedDate < today) {
         this.errors.fecha = 'No puedes seleccionar una fecha pasada'
         this.formData.fecha = '' // Limpia el campo de fecha
         Swal.fire({
@@ -180,7 +189,7 @@ export default {
           confirmButtonColor: '#9d8189'
         })
       } else {
-        this.errors.fecha = ''
+        this.errors.fecha = '' // Sin errores
       }
     },
 
