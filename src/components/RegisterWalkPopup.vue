@@ -20,7 +20,11 @@
               required
             >
               <option disabled value="">Selecciona una mascota</option>
-              <option v-for="mascota in mascotas" :key="mascota.id_mascota" :value="mascota.id_mascota">
+              <option
+                v-for="mascota in mascotas"
+                :key="mascota.id_mascota"
+                :value="mascota.id_mascota"
+              >
                 {{ mascota.nombre }}
               </option>
             </select>
@@ -44,6 +48,8 @@
               <input
                 type="datetime-local"
                 v-model="walkData.fecha_hora"
+                :min="minDate"
+                @change="validateFechaHora"
                 @blur="validateField('fecha_hora')"
                 :class="{ 'error-border': errors.fecha_hora }"
                 required
@@ -86,7 +92,7 @@ export default {
   },
   data() {
     return {
-      isPopupVisible: Boolean,  // Controla la visibilidad del popup
+      isPopupVisible: Boolean, // Controla la visibilidad del popup
       isNotificationPopupVisible: false,
       walkData: {
         mascota: '',
@@ -99,7 +105,8 @@ export default {
         descripcion: '',
         fecha_hora: ''
       },
-      mascotas: []
+      mascotas: [],
+      minDate: new Date().toISOString().slice(0, 16) // Fecha mínima en formato ISO
     }
   },
   methods: {
@@ -111,7 +118,9 @@ export default {
       }
 
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/mascota/mis-mascotas?Usuario_id_usuario=${usuarioId}`)
+        const response = await axios.get(
+          `http://127.0.0.1:5000/mascota/mis-mascotas?Usuario_id_usuario=${usuarioId}`
+        )
         this.mascotas = response.data
       } catch (error) {
         Swal.fire({
@@ -120,6 +129,23 @@ export default {
           text: 'Error al obtener las mascotas',
           confirmButtonColor: '#9d8189'
         })
+      }
+    },
+    validateFechaHora() {
+      const now = new Date()
+      const selectedDate = new Date(this.walkData.fecha_hora)
+
+      if (selectedDate < now) {
+        this.errors.fecha_hora = 'No puedes seleccionar una fecha y hora pasada'
+        this.walkData.fecha_hora = '' // Limpia el campo
+        Swal.fire({
+          icon: 'warning',
+          title: 'Fecha inválida',
+          text: 'Por favor selecciona una fecha y hora actual o futura.',
+          confirmButtonColor: '#9d8189'
+        })
+      } else {
+        this.errors.fecha_hora = ''
       }
     },
     // Método para registrar el paseo
@@ -140,29 +166,30 @@ export default {
               text: 'El paseo ha sido registrado correctamente.',
               confirmButtonColor: '#9d8189',
               customClass: {
-                popup: 'swal-popup'}
+                popup: 'swal-popup'
+              }
             }).then(() => {
-              this.closePopup(); // Cierra el popup después de mostrar la alerta
-            });
+              this.closePopup() // Cierra el popup después de mostrar la alerta
+            })
           }
         } catch (error) {
           console.error('Error al registrar el paseo:', error)
           alert('Error al registrar el paseo')
         }
-      }else {
+      } else {
         console.error('Error en los datos del formulario')
       }
     },
     // Método para abrir el popup
     openPopup() {
-      this.isPopupVisible = true;
-      console.log('Popup abierto:', this.isPopupVisible);
+      this.isPopupVisible = true
+      console.log('Popup abierto:', this.isPopupVisible)
     },
 
     // Método para cerrar el popup
     closePopup() {
-      this.$emit('close');
-      console.log('Popup cerrado:', this.isPopupVisible);
+      this.$emit('close')
+      console.log('Popup cerrado:', this.isPopupVisible)
     },
 
     // Método para validar los campos
@@ -203,13 +230,10 @@ export default {
       this.notificationData = notificationData
       console.log('Datos de notificación guardados:', notificationData)
       this.closeNotificationPopup()
-    },
-    
-
-    
+    }
   },
   mounted() {
-    this.fetchMascotas(); 
+    this.fetchMascotas()
     // Cargar la animación de Lottie en el contenedor
     lottie.loadAnimation({
       container: this.$refs.lottieContainer,
@@ -222,10 +246,8 @@ export default {
 }
 </script>
 
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
 
 .swal-popup {
   z-index: 2000 !important; /* Asegúrate de que sea más alto que el de tu modal */

@@ -78,6 +78,8 @@
                 type="date"
                 id="fecha"
                 v-model="formData.fecha"
+                :min="minDate"
+                @change="validateFecha"
                 :class="{ 'error-border': errors.fecha }"
                 required
               />
@@ -130,7 +132,8 @@ export default {
         id_tipoSalud: '',
         descripcion: '',
         fecha: ''
-      }
+      },
+      minDate: new Date().toISOString().split('T')[0] // Fecha mínima permitida
     }
   },
   methods: {
@@ -161,6 +164,23 @@ export default {
           text: 'No se pudieron cargar las mascotas.',
           confirmButtonColor: '#9d8189'
         })
+      }
+    },
+    validateFecha() {
+      const today = new Date()
+      const selectedDate = new Date(this.formData.fecha)
+
+      if (selectedDate < today) {
+        this.errors.fecha = 'No puedes seleccionar una fecha pasada'
+        this.formData.fecha = '' // Limpia el campo de fecha
+        Swal.fire({
+          icon: 'warning',
+          title: 'Fecha inválida',
+          text: 'Por favor selecciona una fecha actual o futura.',
+          confirmButtonColor: '#9d8189'
+        })
+      } else {
+        this.errors.fecha = ''
       }
     },
 
