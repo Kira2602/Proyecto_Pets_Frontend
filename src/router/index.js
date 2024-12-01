@@ -5,6 +5,7 @@ import MisMascotas from '@/views/MisMascotas.vue'
 import PerfilMascota from '@/views/PerfilMascota.vue'
 import HistorialActividades from '@/views/HistorialActividades.vue'
 import Salud from '@/views/Salud.vue'
+import Calendario from '@/views/Calendario.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,6 +39,11 @@ const router = createRouter({
       path: '/salud',
       name: 'salud',
       component: Salud
+    },
+    {
+      path: '/calendario',
+      name: 'calendario',
+      component: Calendario
     }
   ]
 })
