@@ -10,6 +10,17 @@
       <div id="calendar"></div>
     </section>
 
+    <!-- Modal para detalles -->
+    <div v-if="eventoSeleccionado" class="modal-overlay" @click.self="cerrarModal">
+      <div class="modal">
+        <h3><strong>Descripción:</strong> {{ eventoSeleccionado.name }}</h3>
+        <p><strong>Actividad:</strong> {{ eventoSeleccionado.description }}</p>
+        <p><strong>Fecha:</strong> {{ formatoFecha(eventoSeleccionado.date) }}</p>
+
+        <button class="modal-close" @click="cerrarModal">Cerrar</button>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-content">
@@ -22,35 +33,63 @@
 <script>
 import Navbar from '@/components/Navbar.vue'
 import $ from 'jquery'
-import 'evo-calendar' // Importa el plugin
-import 'evo-calendar/evo-calendar/css/evo-calendar.css' // Importa los estilos del calendario
+import 'evo-calendar'
+import 'evo-calendar/evo-calendar/css/evo-calendar.css'
+import axios from 'axios'
 
 export default {
   name: 'Calendario',
   components: {
     Navbar
   },
+  data() {
+    return {
+      eventoSeleccionado: null // Almacena el evento seleccionado para mostrar en el modal
+    }
+  },
   mounted() {
-    // Inicializa el calendario en el DOM
-    $('#calendar').evoCalendar({
-      theme: 'Midnight Blue', // Aplica un tema (opcional)
-      calendarEvents: [
-        {
-          id: 'mmnnn',
-          name: 'New Year',
-          date: 'January/1/2020',
-          type: 'holiday',
-          everyYear: true
-        },
-        {
-          id: '0908',
-          name: "Valentine's Day",
-          date: 'February/14/2020',
-          type: 'holiday',
-          everyYear: true
-        }
-      ]
-    })
+    this.cargarEventosCalendario()
+  },
+  methods: {
+    async cargarEventosCalendario() {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/actividad/actividades_calendario')
+        const eventos = response.data // Asegúrate de no modificar las fechas aquí
+        console.log('Eventos recibidos del backend:', eventos)
+
+        $('#calendar').evoCalendar({
+          theme: 'Midnight Blue',
+          calendarEvents: eventos
+        })
+
+        $('#calendar').on('selectEvent', (event, activeEvent) => {
+          console.log('Evento seleccionado:', activeEvent)
+          this.abrirModal(activeEvent)
+        })
+      } catch (error) {
+        console.error('Error al cargar los eventos del calendario:', error)
+      }
+    },
+
+    abrirModal(evento) {
+      console.log('Evento recibido:', evento) // Log adicional
+      this.eventoSeleccionado = evento // Asigna directamente el evento
+    },
+
+    cerrarModal() {
+      this.eventoSeleccionado = null // Cierra el modal
+    },
+
+    formatoFecha(fecha) {
+      console.log('Fecha recibida:', fecha) // Verifica la fecha que llega
+      if (!fecha || typeof fecha !== 'string' || !fecha.includes('/')) {
+        // Si la fecha ya está en formato YYYY-MM-DD, devuélvela tal cual
+        return fecha
+      }
+      // Si está en formato MM/DD/YYYY, reorganízala a YYYY-MM-DD
+      const [month, day, year] = fecha.split('/')
+      return `${year}-${month}-${day}`
+    }
   }
 }
 </script>
@@ -87,5 +126,50 @@ export default {
 
 .footer-content {
   font-size: 14px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.modal h3 {
+  margin-bottom: 15px;
+}
+
+.modal p {
+  margin: 10px 0;
+}
+
+.modal-close {
+  background: #9d8189;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.modal-close:hover {
+  background: #7a6652;
 }
 </style>
