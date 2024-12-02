@@ -54,8 +54,15 @@ export default {
     async cargarEventosCalendario() {
       try {
         const response = await axios.get('http://127.0.0.1:5000/actividad/actividades_calendario')
-        const eventos = response.data // Asegúrate de no modificar las fechas aquí
-        console.log('Eventos recibidos del backend:', eventos)
+        const eventos = response.data.map((evento) => {
+          return {
+            ...evento,
+            // Asegúrate de que las fechas estén en el formato correcto
+            date: new Date(evento.date).toISOString().split('T')[0] // Asegura formato YYYY-MM-DD
+          }
+        })
+
+        console.log('Eventos ajustados para el calendario:', eventos)
 
         $('#calendar').evoCalendar({
           theme: 'Midnight Blue',
@@ -81,14 +88,20 @@ export default {
     },
 
     formatoFecha(fecha) {
-      console.log('Fecha recibida:', fecha) // Verifica la fecha que llega
-      if (!fecha || typeof fecha !== 'string' || !fecha.includes('/')) {
-        // Si la fecha ya está en formato YYYY-MM-DD, devuélvela tal cual
-        return fecha
+      console.log('Fecha recibida:', fecha)
+      if (!fecha || typeof fecha !== 'string') {
+        return 'Fecha no disponible'
       }
-      // Si está en formato MM/DD/YYYY, reorganízala a YYYY-MM-DD
-      const [month, day, year] = fecha.split('/')
-      return `${year}-${month}-${day}`
+
+      // Convierte la fecha a un objeto Date para manejo seguro
+      const date = new Date(fecha)
+
+      if (isNaN(date)) {
+        return 'Fecha inválida'
+      }
+
+      // Devuelve la fecha en formato deseado (por ejemplo, YYYY-MM-DD)
+      return date.toISOString().split('T')[0]
     }
   }
 }
