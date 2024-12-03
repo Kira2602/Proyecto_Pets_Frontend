@@ -12,12 +12,28 @@
 
     <!-- Modal para detalles -->
     <div v-if="eventoSeleccionado" class="modal-overlay" @click.self="cerrarModal">
-      <div class="modal">
-        <h3><strong>Descripción:</strong> {{ eventoSeleccionado.name }}</h3>
-        <p><strong>Actividad:</strong> {{ eventoSeleccionado.description }}</p>
-        <p><strong>Fecha:</strong> {{ formatoFecha(eventoSeleccionado.date) }}</p>
+      <div class="popup-wrapper">
+        <div class="popup-content">
+          <div class="color-bar"></div>
+          <button class="close-btn" @click="cerrarModal">×</button>
+          <h2>Detalle del Evento</h2>
 
-        <button class="modal-close" @click="cerrarModal">Cerrar</button>
+          <!-- Contenedor de Lottie -->
+          <div class="profile-image-container">
+            <div ref="lottieCalendar" class="lottie-animation"></div>
+          </div>
+
+          <!-- Información del evento -->
+          <div class="event-details">
+            <h3><strong>Descripción:</strong> {{ eventoSeleccionado.name }}</h3>
+            <p><strong>Actividad:</strong> {{ eventoSeleccionado.description }}</p>
+            <p><strong>Fecha:</strong> {{ formatoFecha(eventoSeleccionado.date) }}</p>
+          </div>
+
+          <div class="button-group">
+            <button class="btn-edit" @click="cerrarModal">Cerrar</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -34,6 +50,7 @@
 import Navbar from '@/components/Navbar.vue'
 import $ from 'jquery'
 import 'evo-calendar'
+import lottie from 'lottie-web'
 import 'evo-calendar/evo-calendar/css/evo-calendar.css'
 import axios from 'axios'
 
@@ -50,6 +67,7 @@ export default {
   mounted() {
     this.cargarEventosCalendario()
   },
+
   methods: {
     async cargarEventosCalendario() {
       try {
@@ -79,8 +97,23 @@ export default {
     },
 
     abrirModal(evento) {
-      console.log('Evento recibido:', evento) // Log adicional
-      this.eventoSeleccionado = evento // Asigna directamente el evento
+      console.log('Evento recibido:', evento)
+      this.eventoSeleccionado = evento
+
+      this.$nextTick(() => {
+        if (this.$refs.lottieCalendar) {
+          console.log('Lottie container found:', this.$refs.lottieCalendar)
+          lottie.loadAnimation({
+            container: this.$refs.lottieCalendar,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: '/lottie/pushen.json' // Ruta local al archivo
+          })
+        } else {
+          console.error('El contenedor de Lottie no se ha montado correctamente.')
+        }
+      })
     },
 
     cerrarModal() {
@@ -92,23 +125,17 @@ export default {
       if (!fecha || typeof fecha !== 'string') {
         return 'Fecha no disponible'
       }
-
-      // Convierte la fecha a un objeto Date para manejo seguro
       const date = new Date(fecha)
-
       if (isNaN(date)) {
         return 'Fecha inválida'
       }
-
-      // Devuelve la fecha en formato deseado (por ejemplo, YYYY-MM-DD)
-      return date.toISOString().split('T')[0]
+      return date.toISOString().split('T')[0] // YYYY-MM-DD
     }
   }
 }
 </script>
 
 <style scoped>
-/* Estilos existentes */
 * {
   padding: 0;
   margin: 0;
@@ -147,42 +174,99 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 9999;
 }
 
-.modal {
-  background: white;
+.popup-wrapper {
+  position: relative;
+  width: 500px;
+  max-height: 90vh;
+}
+
+.popup-content {
+  background: #fff7f7;
   padding: 20px;
-  border-radius: 10px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  width: 100%;
+  max-height: 90vh;
+  box-shadow: 0 0 40px -10px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow-y: auto;
   text-align: center;
 }
 
-.modal h3 {
-  margin-bottom: 15px;
+.color-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: #d3a8a8;
+  border-radius: 5px 5px 0 0;
 }
 
-.modal p {
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+h2 {
+  color: #af8a8a;
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.profile-image-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.lottie-animation {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  display: block;
+  overflow: hidden;
+}
+
+.event-details h3,
+.event-details p {
   margin: 10px 0;
 }
 
-.modal-close {
-  background: #9d8189;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 15px;
+.button-group {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
-.modal-close:hover {
-  background: #7a6652;
+button.btn-edit {
+  background-color: #d8e2dc;
+  color: #9d8189;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button.btn-edit:hover {
+  background-color: #d2a5a5;
+  color: #fff;
 }
 </style>
