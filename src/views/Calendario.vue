@@ -72,21 +72,59 @@ export default {
     async cargarEventosCalendario() {
       try {
         const response = await axios.get('http://127.0.0.1:5000/actividad/actividades_calendario')
-        const eventos = response.data.map((evento) => {
-          return {
-            ...evento,
-            // Asegúrate de que las fechas estén en el formato correcto
-            date: new Date(evento.date).toISOString().split('T')[0] // Asegura formato YYYY-MM-DD
-          }
-        })
+        const eventos = response.data.map((evento) => ({
+          ...evento,
+          date: new Date(evento.date).toISOString().split('T')[0] // Formato YYYY-MM-DD
+        }))
 
         console.log('Eventos ajustados para el calendario:', eventos)
 
+        // Inicializa el calendario con la configuración en español
         $('#calendar').evoCalendar({
           theme: 'Midnight Blue',
-          calendarEvents: eventos
+          calendarEvents: eventos,
+          language: 'es', // Establece el idioma en español
+          format: 'dd/MM/yyyy',
+          languages: {
+            es: {
+              days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+              daysShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+              months: [
+                'Enero',
+                'Febrero',
+                'Marzo',
+                'Abril',
+                'Mayo',
+                'Junio',
+                'Julio',
+                'Agosto',
+                'Septiembre',
+                'Octubre',
+                'Noviembre',
+                'Diciembre'
+              ],
+              monthsShort: [
+                'Ene',
+                'Feb',
+                'Mar',
+                'Abr',
+                'May',
+                'Jun',
+                'Jul',
+                'Ago',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dic'
+              ],
+              today: 'Hoy',
+              noEventForToday: 'No hay eventos para hoy',
+              noEventForThisDay: 'No hay eventos para este día'
+            }
+          }
         })
 
+        // Evento cuando se selecciona un evento
         $('#calendar').on('selectEvent', (event, activeEvent) => {
           console.log('Evento seleccionado:', activeEvent)
           this.abrirModal(activeEvent)
