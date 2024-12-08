@@ -188,7 +188,7 @@ body {
 }
 
 #typing-text {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-family: 'Poppins', sans-serif;
   color: #7a6652;
   white-space: pre-line;

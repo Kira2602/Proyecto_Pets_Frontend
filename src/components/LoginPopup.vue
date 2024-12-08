@@ -218,7 +218,7 @@ export default {
   color: #af8a8a;
   margin-bottom: 10px;
   text-align: center;
-  font-size: 2.4rem;
+  font-size: 35px;
 }
 
 .login-form label {
@@ -229,7 +229,7 @@ export default {
 }
 
 .login-form input {
-  width: 80%;
+  width: 90%;
   padding: 12px;
   margin-bottom: 15px;
   border: 1px solid #ddd;
@@ -250,15 +250,15 @@ export default {
 }
 
 .password-wrapper input {
-  width: 73%;
+  width: 90%;
   padding-right: 40px;
 }
 
 .toggle-password {
   position: absolute;
   top: 50%;
-  right: 65px;
-  transform: translateY(-50%);
+  right: 50px;
+  transform: translateY(-70%);
   cursor: pointer;
   font-size: 1.2rem;
   color: #af8a8a;
@@ -275,12 +275,13 @@ export default {
 .btn-login {
   background-color: #ffe5d9;
   color: #9d9189;
-  padding: 10px 20px;
+  padding: 8px 20px;
   border: none;
   border-radius: 25px;
   cursor: pointer;
+  margin-left: 60px;
   font-weight: bold;
-  width: 80%;
+  width: 60%;
   margin-bottom: 10px;
   font-size: 1.2rem;
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2);
@@ -293,15 +294,16 @@ export default {
 .btn-register {
   background-color: #d8e2dc;
   color: #9d9189;
-  padding: 10px 20px;
+  padding: 8px 20px;
   border: none;
   border-radius: 25px;
   cursor: pointer;
-  width: 80%;
+  width: 60%;
   margin-top: 10px;
   font-weight: bold;
   font-size: 1.2rem;
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2);
+  margin-left: 60px;
 }
 
 .btn-register:hover {
@@ -353,7 +355,7 @@ export default {
   }
 
   .login-form h2 {
-    font-size: 2rem;
+    font-size: 1rem;
   }
 
   .login-form input {

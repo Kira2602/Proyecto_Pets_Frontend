@@ -241,7 +241,7 @@ export default {
   color: #af8a8a;
   margin-bottom: 10px;
   text-align: center;
-  font-size: 2.2rem;
+  font-size: 35px;
 }
 
 .register-form label {
@@ -266,14 +266,14 @@ export default {
 }
 
 .password-wrapper input {
-  width: 73%;
+  width: 80%;
   padding-right: 40px;
 }
 
 .toggle-password {
   position: absolute;
   top: 50%;
-  right: 65px;
+  right: 80px;
   transform: translateY(-70%);
   cursor: pointer;
   font-size: 1.2rem;
@@ -293,11 +293,11 @@ export default {
 .btn-register {
   background-color: #d8e2dc;
   color: #9d8189;
-  padding: 10px 10px;
+  padding: 8px 10px;
   border: none;
   border-radius: 25px;
   cursor: pointer;
-  width: 80%;
+  width: 70%;
   margin-top: 10px;
   font-size: 1.2rem;
   margin-left: 15px;
