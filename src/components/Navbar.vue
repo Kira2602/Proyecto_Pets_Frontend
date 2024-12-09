@@ -93,6 +93,10 @@
         <li v-if="!isAuthenticated">
           <button class="btn btn-filled" @click="showRegisterPopup">Registrarse</button>
         </li>
+        <div>
+          <button @click="openChangePasswordPopup">Abrir Cambiar Contraseña</button>
+        </div>
+
       </ul>
     </div>
 
@@ -101,7 +105,13 @@
       :isVisible="showLoginPopupVisible"
       @close="closeLoginPopup"
       @switchToRegister="switchToRegister"
+      @openChangePassword="openChangePasswordPopup"
     />
+    <ChangePasswordPopup
+      :isVisible="showChangePasswordPopupVisible"
+      @close="closeChangePasswordPopup"
+    />
+
 
     <!-- RegisterPopup -->
     <RegisterPopup :isVisible="showRegisterPopupVisible" @close="closeRegisterPopup" />
@@ -112,12 +122,16 @@
 import LoginPopup from '@/components/LoginPopup.vue'
 import RegisterPopup from '@/components/RegisterPopup.vue'
 import Swal from 'sweetalert2'
+import ChangePasswordPopup from '@/components/ChangePasswordPopup.vue';
+
 
 export default {
+  // eslint-disable-next-line vue/multi-word-component-names
   name: 'Navbar',
   components: {
     LoginPopup,
-    RegisterPopup
+    RegisterPopup,
+    ChangePasswordPopup,
   },
   props: {
     nombre: {
@@ -131,6 +145,7 @@ export default {
       nombreUsuario: this.nombre, // Nombre dinámico inicializado desde props
       showLoginPopupVisible: false,
       showRegisterPopupVisible: false,
+      showChangePasswordPopupVisible: false,
       dropdownOpen: false,
       isOnInicio: false,
       isOnMisMascotas: false,
@@ -189,6 +204,15 @@ export default {
     switchToRegister() {
       this.showLoginPopupVisible = false
       this.showRegisterPopupVisible = true
+    },
+    openChangePasswordPopup() {
+      console.log('Mostrando ChangePasswordPopup') // Depuración
+      this.showChangePasswordPopupVisible = true
+      console.log('Valor de showChangePasswordPopupVisible:', this.showChangePasswordPopupVisible);
+    },
+    closeChangePasswordPopup() {
+      console.log('Cerrando ChangePasswordPopup') // Depuración
+      this.showChangePasswordPopupVisible = false
     },
     toggleDropdown() {
       this.dropdownOpen = !this.dropdownOpen

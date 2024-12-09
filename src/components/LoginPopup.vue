@@ -27,7 +27,7 @@
             </div>
             <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
 
-            <a href="#" class="forgot-password">Olvidé mi contraseña.</a>
+            <a href="#" class="forgot-password" @click.prevent="goToChangePassword">Olvidé mi contraseña.</a>
 
             <button type="submit" class="btn-login">Ingresar</button>
           </form>
@@ -66,6 +66,11 @@ export default {
   methods: {
     closePopup() {
       this.$emit('close')
+    },
+    goToChangePassword() {
+      console.log('Evento openChangePassword emitido')
+      this.$emit('openChangePassword') // Notifica al padre
+      this.closePopup() // Cierra el LoginPopup
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword
