@@ -69,7 +69,7 @@
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/history.png" alt="Historial de mascotas" />
-              <p>Historial de actividades mascotas</p>
+              <p>Historial Actividades</p>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="redirectToCalendario">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/calendario.png" alt="Calendario" />
@@ -130,16 +130,18 @@
     />
 
     <!-- Popup de registrar paseo -->
-    <RegisterWalkPopup 
-    v-if="isWalkPopupVisible" 
-    :actividad-id="actividadSeleccionada"
-    @close="isWalkPopupVisible = false" />
+    <RegisterWalkPopup
+      v-if="isWalkPopupVisible"
+      :actividad-id="actividadSeleccionada"
+      @close="isWalkPopupVisible = false"
+    />
 
     <!-- Popup de registrar comida -->
-    <RegisterFoodPopup 
-    v-if="isFoodPopupVisible" 
-    :actividad-id="actividadSeleccionada"
-    @close="isFoodPopupVisible = false" />
+    <RegisterFoodPopup
+      v-if="isFoodPopupVisible"
+      :actividad-id="actividadSeleccionada"
+      @close="isFoodPopupVisible = false"
+    />
 
     <!-- Popup de registrar otra actividad -->
     <RegisterOtherActivityPopup
@@ -184,7 +186,6 @@ export default {
       usuarioId: null, // ID del usuario almacenado
       nombreUsuario: localStorage.getItem('nombre') || '', // Inicializar con el nombre almacenado
       actividadSeleccionada: null // ID de la actividad seleccionada
-
     }
   },
   methods: {
@@ -205,26 +206,26 @@ export default {
       }
     },
     openMedicalAppointmentPopup() {
-      this.actividadSeleccionada = 1;
-      console.log("Actividad seleccionada:", this.actividadSeleccionada);
+      this.actividadSeleccionada = 1
+      console.log('Actividad seleccionada:', this.actividadSeleccionada)
 
       this.isMedicalAppointmentPopupVisible = true
     },
     openWalkPopup() {
-      this.actividadSeleccionada = 2; // ID de actividad para "Paseo"
-      console.log("Actividad seleccionada:", this.actividadSeleccionada);
+      this.actividadSeleccionada = 2 // ID de actividad para "Paseo"
+      console.log('Actividad seleccionada:', this.actividadSeleccionada)
 
       this.isWalkPopupVisible = true
     },
     openFoodPopup() {
-      this.actividadSeleccionada = 3; // ID de actividad para "Comida"
-      console.log("Actividad seleccionada:", this.actividadSeleccionada);
+      this.actividadSeleccionada = 3 // ID de actividad para "Comida"
+      console.log('Actividad seleccionada:', this.actividadSeleccionada)
 
       this.isFoodPopupVisible = true
     },
     openOtherActivityPopup() {
-      this.actividadSeleccionada = 4; // ID de actividad para "Otras actividades"
-      console.log("Actividad seleccionada:", this.actividadSeleccionada);
+      this.actividadSeleccionada = 4 // ID de actividad para "Otras actividades"
+      console.log('Actividad seleccionada:', this.actividadSeleccionada)
 
       this.isOtherActivityPopupVisible = true
     },
@@ -334,7 +335,7 @@ body {
 
 .icon-card p {
   margin-top: 10px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   color: #4e3b47;
 }

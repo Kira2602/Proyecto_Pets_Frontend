@@ -20,7 +20,11 @@
               required
             >
               <option disabled value="">Selecciona una mascota</option>
-              <option v-for="mascota in mascotas" :key="mascota.id_mascota" :value="mascota.id_mascota">
+              <option
+                v-for="mascota in mascotas"
+                :key="mascota.id_mascota"
+                :value="mascota.id_mascota"
+              >
                 {{ mascota.nombre }}
               </option>
             </select>
@@ -44,6 +48,8 @@
               <input
                 type="datetime-local"
                 v-model="activityData.fecha_hora"
+                :min="minDate"
+                @change="validateFechaHora"
                 @blur="validateField('fecha_hora')"
                 :class="{ 'error-border': errors.fecha_hora }"
                 required
@@ -99,7 +105,8 @@ export default {
         descripcion: '',
         fecha_hora: ''
       },
-      mascotas: []
+      mascotas: [],
+      minDate: `${new Date().toISOString().split('T')[0]}T00:00`
     }
   },
   methods: {
@@ -111,7 +118,9 @@ export default {
       }
 
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/mascota/mis-mascotas?Usuario_id_usuario=${usuarioId}`)
+        const response = await axios.get(
+          `http://127.0.0.1:5000/mascota/mis-mascotas?Usuario_id_usuario=${usuarioId}`
+        )
         this.mascotas = response.data
       } catch (error) {
         Swal.fire({
@@ -120,6 +129,23 @@ export default {
           text: 'Error al obtener las mascotas',
           confirmButtonColor: '#9d8189'
         })
+      }
+    },
+    validateFechaHora() {
+      const now = new Date()
+      const selectedDate = new Date(this.activityData.fecha_hora)
+
+      if (selectedDate < now) {
+        this.errors.fecha_hora = 'No puedes seleccionar una fecha y hora pasada'
+        this.activityData.fecha_hora = '' // Limpia el campo
+        Swal.fire({
+          icon: 'warning',
+          title: 'Fecha inválida',
+          text: 'Por favor selecciona una fecha y hora actual o futura.',
+          confirmButtonColor: '#9d8189'
+        })
+      } else {
+        this.errors.fecha_hora = ''
       }
     },
     // Método para registrar la comida
@@ -140,16 +166,17 @@ export default {
               text: 'El paseo ha sido registrado correctamente.',
               confirmButtonColor: '#9d8189',
               customClass: {
-                popup: 'swal-popup'}
+                popup: 'swal-popup'
+              }
             }).then(() => {
-              this.closePopup(); // Cierra el popup después de mostrar la alerta
-            });
+              this.closePopup() // Cierra el popup después de mostrar la alerta
+            })
           }
         } catch (error) {
           console.error('Error al registrar la comida:', error)
           alert('Error al registrar la comida')
         }
-      }else {
+      } else {
         console.error('Error en los datos del formulario')
       }
     },
@@ -169,13 +196,13 @@ export default {
         this.errors.fecha_hora = 'Por favor selecciona una fecha y hora'
       }
     },
-     // Validar todos los campos
-     validateAllFields() {
-        this.validateField('mascota');
-        this.validateField('descripcion');
-        this.validateField('fecha_hora');
+    // Validar todos los campos
+    validateAllFields() {
+      this.validateField('mascota')
+      this.validateField('descripcion')
+      this.validateField('fecha_hora')
 
-        return !this.errors.mascota && !this.errors.descripcion && !this.errors.fecha_hora;
+      return !this.errors.mascota && !this.errors.descripcion && !this.errors.fecha_hora
     },
     openNotificationPopup() {
       this.isNotificationPopupVisible = true
@@ -244,7 +271,7 @@ export default {
     
   },
   mounted() {
-    this.fetchMascotas(); 
+    this.fetchMascotas()
     // Cargar la animación de Lottie en el contenedor
     lottie.loadAnimation({
       container: this.$refs.lottieContainer,

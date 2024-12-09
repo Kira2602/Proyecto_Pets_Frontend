@@ -32,6 +32,34 @@
             min="2000"
             class="custom-input"
           />
+
+
+           <!-- Mes -->
+    <input
+    type="number"
+      v-if="filterDate.mes"
+      v-model="selectedMonth"
+      placeholder="Mes"
+      min="1"
+      max="12"
+      class="custom-input"
+    />
+
+    <p v-if="monthError" class="error-message">El número máximo para mes es 12.</p>
+
+
+    <!-- Día -->
+    <input
+    type="number"
+      v-if="filterDate.dia"
+      v-model="selectedDay"
+      placeholder="Día"
+      min="1"
+      max="31"
+      class="custom-input"
+    />
+    <p v-if="dayError" class="error-message">El número máximo para día es 31.</p>
+    
         </div>
 
         <div class="filtro">
@@ -96,6 +124,10 @@
 import Navbar from '@/components/Navbar.vue'
 import lottie from 'lottie-web'
 
+
+import axios from 'axios'
+
+
 export default {
   name: 'HistorialActividades',
   components: {
@@ -107,14 +139,18 @@ export default {
       selectedCategory: '',
       selectedStatus: '',
       selectedYear: new Date().getFullYear(),
-      filterDate: { dia: false, mes: false, año: true },
+      selectedMonth: '',
+    selectedDay: '',
+
+      filterDate: { dia: false, mes: false, año: false},
       mascotas: [
-        { id: 1, nombre: 'Coco' },
-        { id: 2, nombre: 'Lulu' }
+       // { id: 1, nombre: 'Coco' },
+        //{ id: 2, nombre: 'Lulu' }
       ],
       categorias: ['Vacunas', 'Paseo', 'Comida', 'Otra actividad'],
       estados: ['Completado', 'Pendiente', 'Cancelado'],
       actividades: [
+        /*
         {
           id: 1,
           mascota: 'Coco',
@@ -130,23 +166,92 @@ export default {
           categoria: 'Paseo',
           estado: 'Completado',
           descripcion: 'parque'
-        }
+        }/*/ 
       ]
     }
   },
   computed: {
+
+    monthError() {
+      return  this.selectedMonth > 12;
+    },
+    dayError() {
+      return  this.selectedDay > 31;
+    },
     filteredActivities() {
+
       return this.actividades.filter((actividad) => {
         const matchPet = this.selectedPet === '' || actividad.mascota === this.selectedPet
         const matchCategory =
           this.selectedCategory === '' || actividad.categoria === this.selectedCategory
         const matchStatus = this.selectedStatus === '' || actividad.estado === this.selectedStatus
         const matchYear = !this.filterDate.año || actividad.fecha.includes(this.selectedYear)
+        const matchMonth = !this.filterDate.mes || actividad.fecha.slice(3, 5) === String(this.selectedMonth).padStart(2, '0')
+      
+      // Verifica si el día coincide (filtra por día)
+      const matchDay = !this.filterDate.dia || actividad.fecha.slice(0, 2) === String(this.selectedDay).padStart(2, '0')
 
-        return matchPet && matchCategory && matchStatus && matchYear
+        
+
+      
+
+       // return matchPet && matchCategory && matchStatus && matchYear
+      
+       return matchPet && matchCategory && matchStatus && matchYear && matchMonth && matchDay;
+ 
       })
+
+      
     }
   },
+
+
+
+
+methods: {
+    formatearFecha(fechaISO) {
+      const fecha = new Date(fechaISO)
+      const dia = String(fecha.getDate()).padStart(2, '0')
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+      const año = fecha.getFullYear()
+      return `${dia}/${mes}/${año}`
+    },
+    transformarDatos(datosBackend) {
+      return datosBackend.map((actividad) => ({
+        id: actividad.id_actividad,
+        mascota: actividad.mascota,
+        fecha: this.formatearFecha(actividad.fecha_hora), // Convierte la fecha
+        categoria: actividad.tipo_actividad, // Renombrado de "tipo_actividad"
+        estado: 'Completado', // Valor fijo (puedes cambiarlo si hay más datos de estado)
+        descripcion: actividad.descripcion // Renombrado directamente
+      }))
+    },
+    async cargarActividades() {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/actividad/lista')
+        this.actividades = this.transformarDatos(response.data)
+
+        
+
+         const nombresMascotas = [...new Set(response.data.map((actividad) => actividad.mascota))];
+    this.mascotas = nombresMascotas.map((nombre, index) => ({
+      id: index + 1, // Generar un ID temporal
+      nombre,
+    }));
+      } catch (error) {
+        console.error('Error al cargar actividades:', error)
+      }
+    }
+  },
+
+
+
+
+
+///************************** */
+
+
+
   mounted() {
     // Cargar animación de Lottie
     this.lottieInstance = lottie.loadAnimation({
@@ -156,6 +261,10 @@ export default {
       autoplay: true,
       path: 'https://lottie.host/7c60a5bf-6152-43db-9d80-3bed207422ad/gSKGD7G5V4.json'
     })
+
+    //**
+    this.cargarActividades()
+    //*/
   }
 }
 </script>

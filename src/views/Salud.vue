@@ -93,26 +93,23 @@
             </select>
           </div>
           <div class="filtro">
-            <label>Fecha:</label>
-            <div class="fecha-opciones">
-              <div>
-                <input type="checkbox" v-model="filterDate.dia" class="custom-checkbox" /> Día
-              </div>
-              <div>
-                <input type="checkbox" v-model="filterDate.mes" class="custom-checkbox" /> Mes
-              </div>
-              <div>
-                <input type="checkbox" v-model="filterDate.año" class="custom-checkbox" /> Año
-              </div>
-              <input
-                type="number"
-                v-if="filterDate.año"
-                v-model="selectedYear"
-                placeholder="2024"
-                min="2000"
-                class="custom-input"
-              />
-            </div>
+            <label>Filtrar por Mes:</label>
+            <select v-model="selectedMonth" class="custom-select">
+              <option value="">Todos los meses</option>
+              <option v-for="(month, index) in months" :key="index" :value="index + 1">
+                {{ month }}
+              </option>
+            </select>
+          </div>
+          <div class="filtro">
+            <label>Filtrar por Año:</label>
+            <input
+              type="number"
+              v-model="selectedYear"
+              placeholder="2024"
+              min="2000"
+              class="custom-input"
+            />
           </div>
 
           <!-- Animación de Lottie -->
@@ -219,6 +216,21 @@ export default {
       isRegisterSaludPopupVisible: false,
       searchQuery: '',
       selectedPet: '',
+      selectedMonth: '',
+      months: [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre'
+      ],
       selectedCategory: '',
       selectedYear: new Date().getFullYear(),
       filterDate: { dia: false, mes: false, año: true },
@@ -241,7 +253,12 @@ export default {
         const matchPet = this.selectedPet === '' || actividad.mascota === this.selectedPet
         const matchCategory =
           this.selectedCategory === '' || actividad.tipo === this.selectedCategory
-        const matchYear = !this.filterDate.año || actividad.fecha.includes(this.selectedYear)
+        const matchYear =
+          !this.selectedYear || actividad.fecha.startsWith(this.selectedYear.toString())
+
+        const matchMonth =
+          !this.selectedMonth ||
+          new Date(actividad.fecha).getMonth() + 1 === parseInt(this.selectedMonth)
 
         // Nuevo: Filtrar por búsqueda en nombre de mascota y observación
         const matchSearch =
@@ -249,7 +266,7 @@ export default {
           actividad.mascota.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           actividad.observacion.toLowerCase().includes(this.searchQuery.toLowerCase())
 
-        return matchPet && matchCategory && matchYear && matchSearch
+        return matchPet && matchCategory && matchYear && matchMonth && matchSearch
       })
     },
     paginatedActivities() {

@@ -55,3 +55,7 @@ npm install lottie-web
 ```sh
 npm install vue3-pagination
 ```
+### Librería para el calendario
+```sh
+npm install evo-calendar
+```

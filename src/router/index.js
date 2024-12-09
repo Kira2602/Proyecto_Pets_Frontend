@@ -5,12 +5,8 @@ import MisMascotas from '@/views/MisMascotas.vue'
 import PerfilMascota from '@/views/PerfilMascota.vue'
 import HistorialActividades from '@/views/HistorialActividades.vue'
 import Salud from '@/views/Salud.vue'
-<<<<<<< Updated upstream
-
-=======
 import Calendario from '@/views/Calendario.vue'
 import Notificaciones from '@/views/Notificaciones.vue'
->>>>>>> Stashed changes
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -43,9 +39,6 @@ const router = createRouter({
       path: '/salud',
       name: 'salud',
       component: Salud
-<<<<<<< Updated upstream
-    }
-=======
     },
     {
       path: '/calendario',
@@ -58,7 +51,6 @@ const router = createRouter({
       component: Notificaciones
     },
 
->>>>>>> Stashed changes
   ]
 })
 

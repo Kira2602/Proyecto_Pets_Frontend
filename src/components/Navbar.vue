@@ -7,7 +7,13 @@
 
     <!-- Mostrar botón "Volver", notificaciones, y perfil en "mis-mascotas" -->
     <div
-      v-if="isOnMisMascotas || isOnPerfilMascota || isOnHistorialActividades || isOnSalud"
+      v-if="
+        isOnMisMascotas ||
+        isOnPerfilMascota ||
+        isOnHistorialActividades ||
+        isOnSalud ||
+        isOnCalendario
+      "
       class="menu-desktop"
     >
       <button class="btn btn-outline" @click="goBack">Volver</button>
@@ -129,7 +135,8 @@ export default {
       isOnInicio: false,
       isOnMisMascotas: false,
       isOnHistorialActividades: false,
-      isOnSalud: false
+      isOnSalud: false,
+      isOnCalendario: false
     }
   },
   mounted() {
@@ -163,6 +170,7 @@ export default {
       this.isOnPerfilMascota = this.$route.name === 'perfil-mascota'
       this.isOnHistorialActividades = this.$route.name === 'historial-actividades'
       this.isOnSalud = this.$route.name === 'salud'
+      this.isOnCalendario = this.$route.name === 'calendario'
     },
     showLoginPopup() {
       this.showLoginPopupVisible = true
