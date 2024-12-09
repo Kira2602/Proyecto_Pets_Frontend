@@ -73,7 +73,7 @@
             </div>
           </div>
         </div>
-        <div class="icon-card">
+        <div class="icon-card" @click="redirectToNotificaciones">
           <div class="animated-border">
             <div class="inner-card">
               <img src="@/components/images/reminder.png" alt="Recordatorios" />
@@ -240,7 +240,12 @@ export default {
     actualizarNombreUsuario(datos) {
       this.nombreUsuario = datos.nombre // Actualizar el nombre del usuario después de editarlo
     },
-    
+    redirectToCalendario() {
+      this.$router.push({ name: 'calendario' })
+    },
+    redirectToNotificaciones() {
+      this.$router.push({ name: 'Notificaciones' })
+    },
   },
   mounted() {
     this.usuarioId = localStorage.getItem('Usuario_id_usuario')
