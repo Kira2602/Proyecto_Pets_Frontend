@@ -72,19 +72,20 @@ export default {
     async cargarEventosCalendario() {
       try {
         const response = await axios.get('http://127.0.0.1:5000/actividad/actividades_calendario')
+
+        // Asegúrate de mantener el formato de fecha y hora correctamente
         const eventos = response.data.map((evento) => ({
           ...evento,
-          date: new Date(evento.date).toISOString().split('T')[0] // Formato YYYY-MM-DD
+          date: new Date(evento.date).toISOString() // ISO format with time
         }))
 
         console.log('Eventos ajustados para el calendario:', eventos)
 
-        // Inicializa el calendario con la configuración en español
+        // Inicializa el calendario
         $('#calendar').evoCalendar({
           theme: 'Midnight Blue',
           calendarEvents: eventos,
-          language: 'es', // Establece el idioma en español
-          format: 'dd/MM/yyyy',
+          language: 'es',
           languages: {
             es: {
               days: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
@@ -124,7 +125,7 @@ export default {
           }
         })
 
-        // Evento cuando se selecciona un evento
+        // Escucha los eventos del calendario
         $('#calendar').on('selectEvent', (event, activeEvent) => {
           console.log('Evento seleccionado:', activeEvent)
           this.abrirModal(activeEvent)
@@ -163,11 +164,22 @@ export default {
       if (!fecha || typeof fecha !== 'string') {
         return 'Fecha no disponible'
       }
+
       const date = new Date(fecha)
       if (isNaN(date)) {
         return 'Fecha inválida'
       }
-      return date.toISOString().split('T')[0] // YYYY-MM-DD
+
+      // Devuelve la fecha y hora en el formato deseado
+      const opciones = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }
+      return date.toLocaleDateString('es-ES', opciones)
     }
   }
 }
