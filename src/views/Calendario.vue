@@ -170,14 +170,12 @@ export default {
         return 'Fecha inválida'
       }
 
-      // Devuelve la fecha y hora en el formato deseado
+      // Devuelve solo la fecha en formato deseado
       const opciones = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        weekday: 'long', // Día de la semana
+        year: 'numeric', // Año
+        month: 'long', // Nombre del mes completo
+        day: 'numeric' // Día del mes
       }
       return date.toLocaleDateString('es-ES', opciones)
     }
