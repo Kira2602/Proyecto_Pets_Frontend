@@ -1,108 +1,116 @@
 <template>
-    <div v-if="isVisible" class="popup-overlay" @click.self="closePopup">
-      <div class="popup">
-        <button class="close-btn" @click="closePopup">×</button>
-        <div class="popup-content">
-          <div class="popup-image">
-            <img src="@/components/images/login_image.jpeg" alt="Login Image" />
-          </div>
-          <div class="popup-form">
-            <h2>Cambiar Contraseña</h2>
-            <form @submit.prevent="changePassword">
-              <label for="email">Email</label>
-              <input type="email" v-model="email" id="email" placeholder="Email" />
-              <label for="new-password">Nueva Contraseña</label>
-              <input type="password" v-model="newPassword" id="new-password" placeholder="Nueva Contraseña" />
-              <button type="submit" class="btn-login">Cambiar</button>
-            </form>
-          </div>
+  <div v-if="isVisible" class="popup-overlay" @click.self="closePopup">
+    <div class="popup">
+      <button class="close-btn" @click="closePopup">×</button>
+      <div class="popup-content">
+        <div class="popup-image">
+          <img src="@/components/images/candado.png" alt="Login Image" />
+        </div>
+        <div class="popup-form">
+          <h2>Cambiar Contraseña</h2>
+          <form @submit.prevent="changePassword">
+            <label for="email">Email</label>
+            <input type="email" v-model="email" id="email" placeholder="Email" />
+            <label for="new-password">Nueva Contraseña</label>
+            <input
+              type="password"
+              v-model="newPassword"
+              id="new-password"
+              placeholder="Nueva Contraseña"
+            />
+            <button type="submit" class="btn-login">Cambiar</button>
+          </form>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import Swal from 'sweetalert2';
-import axios from 'axios';
+  </div>
+</template>
+
+<script>
+import Swal from 'sweetalert2'
+import axios from 'axios'
 
 export default {
-  name: "ChangePasswordPopup",
+  name: 'ChangePasswordPopup',
   props: {
     isVisible: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   data() {
     return {
-      email: "",
-      newPassword: "",
-    };
+      email: '',
+      newPassword: ''
+    }
   },
   methods: {
     closePopup() {
-      this.$emit("close");
+      this.$emit('close')
     },
     async changePassword() {
       // Validar campos antes de enviar la solicitud
       if (!this.email || !this.newPassword) {
         Swal.fire({
-          icon: "error",
-          title: "Campos incompletos",
-          text: "Por favor, complete todos los campos.",
-          confirmButtonText: "OK",
+          icon: 'error',
+          title: 'Campos incompletos',
+          text: 'Por favor, complete todos los campos.',
+          confirmButtonText: 'OK',
           customClass: {
-            confirmButton: "my-swal-button",
-          },
-        });
-        return;
+            confirmButton: 'my-swal-button'
+          }
+        })
+        return
       }
 
       try {
         // URL de tu API para el cambio de contraseña
-        const apiUrl = "http://127.0.0.1:5000/usuario/cambiar";
+        const apiUrl = 'http://127.0.0.1:5000/usuario/cambiar'
 
         // Datos a enviar
         const data = {
           email: this.email,
-          nueva_contrasenia: this.newPassword, // Coincide con lo que espera tu backend
-        };
+          nueva_contrasenia: this.newPassword // Coincide con lo que espera tu backend
+        }
 
         // Enviar solicitud POST sin almacenar la respuesta
-        await axios.put(apiUrl, data);
+        await axios.put(apiUrl, data)
 
         // Alerta de éxito
         Swal.fire({
-          icon: "success",
-          title: "Cambio exitoso",
-          text: "Tu contraseña ha sido actualizada correctamente.",
-          confirmButtonText: "OK",
+          icon: 'success',
+          title: 'Cambio exitoso',
+          text: 'Tu contraseña ha sido actualizada correctamente.',
+          confirmButtonText: 'OK',
           customClass: {
-            confirmButton: "my-swal-button",
-          },
-        });
+            confirmButton: 'my-swal-button'
+          }
+        })
 
-        this.closePopup(); // Cierra el popup después de un cambio exitoso
+        this.closePopup() // Cierra el popup después de un cambio exitoso
       } catch (error) {
-        console.error("Error al cambiar la contraseña:", error.response ? error.response.data : error.message);
+        console.error(
+          'Error al cambiar la contraseña:',
+          error.response ? error.response.data : error.message
+        )
 
         // Manejo de errores con SweetAlert2
         Swal.fire({
-          icon: "error",
-          title: "Error en el cambio de contraseña",
-          text: error.response?.data?.message || "Hubo un error al procesar tu solicitud. Por favor, intenta de nuevo.",
-          confirmButtonText: "OK",
+          icon: 'error',
+          title: 'Error en el cambio de contraseña',
+          text:
+            error.response?.data?.message ||
+            'Hubo un error al procesar tu solicitud. Por favor, intenta de nuevo.',
+          confirmButtonText: 'OK',
           customClass: {
-            confirmButton: "my-swal-button",
-          },
-        });
+            confirmButton: 'my-swal-button'
+          }
+        })
       }
-    },
-  },
-};
-
-
-  </script>
+    }
+  }
+}
+</script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -126,7 +134,7 @@ export default {
 .popup {
   background-color: white;
   border-radius: 20px;
-  width: 900px;
+  width: 600px;
   max-width: 90%;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -225,5 +233,4 @@ export default {
     text-align: center;
   }
 }
-
 </style>

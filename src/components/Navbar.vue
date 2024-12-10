@@ -12,7 +12,8 @@
         isOnPerfilMascota ||
         isOnHistorialActividades ||
         isOnSalud ||
-        isOnCalendario
+        isOnCalendario ||
+        isOnNotificaciones
       "
       class="menu-desktop"
     >
@@ -96,7 +97,6 @@
         <div>
           <button @click="openChangePasswordPopup">Abrir Cambiar Contraseña</button>
         </div>
-
       </ul>
     </div>
 
@@ -112,7 +112,6 @@
       @close="closeChangePasswordPopup"
     />
 
-
     <!-- RegisterPopup -->
     <RegisterPopup :isVisible="showRegisterPopupVisible" @close="closeRegisterPopup" />
   </nav>
@@ -122,8 +121,7 @@
 import LoginPopup from '@/components/LoginPopup.vue'
 import RegisterPopup from '@/components/RegisterPopup.vue'
 import Swal from 'sweetalert2'
-import ChangePasswordPopup from '@/components/ChangePasswordPopup.vue';
-
+import ChangePasswordPopup from '@/components/ChangePasswordPopup.vue'
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
@@ -131,7 +129,7 @@ export default {
   components: {
     LoginPopup,
     RegisterPopup,
-    ChangePasswordPopup,
+    ChangePasswordPopup
   },
   props: {
     nombre: {
@@ -151,7 +149,8 @@ export default {
       isOnMisMascotas: false,
       isOnHistorialActividades: false,
       isOnSalud: false,
-      isOnCalendario: false
+      isOnCalendario: false,
+      isOnNotificaciones: false
     }
   },
   mounted() {
@@ -186,6 +185,7 @@ export default {
       this.isOnHistorialActividades = this.$route.name === 'historial-actividades'
       this.isOnSalud = this.$route.name === 'salud'
       this.isOnCalendario = this.$route.name === 'calendario'
+      this.isOnNotificaciones = this.$route.name === 'Notificaciones'
     },
     showLoginPopup() {
       this.showLoginPopupVisible = true
@@ -208,7 +208,7 @@ export default {
     openChangePasswordPopup() {
       console.log('Mostrando ChangePasswordPopup') // Depuración
       this.showChangePasswordPopupVisible = true
-      console.log('Valor de showChangePasswordPopupVisible:', this.showChangePasswordPopupVisible);
+      console.log('Valor de showChangePasswordPopupVisible:', this.showChangePasswordPopupVisible)
     },
     closeChangePasswordPopup() {
       console.log('Cerrando ChangePasswordPopup') // Depuración
