@@ -33,33 +33,30 @@
             class="custom-input"
           />
 
+          <!-- Mes -->
+          <input
+            type="number"
+            v-if="filterDate.mes"
+            v-model="selectedMonth"
+            placeholder="Mes"
+            min="1"
+            max="12"
+            class="custom-input"
+          />
 
-           <!-- Mes -->
-    <input
-    type="number"
-      v-if="filterDate.mes"
-      v-model="selectedMonth"
-      placeholder="Mes"
-      min="1"
-      max="12"
-      class="custom-input"
-    />
+          <p v-if="monthError" class="error-message">El número máximo para mes es 12.</p>
 
-    <p v-if="monthError" class="error-message">El número máximo para mes es 12.</p>
-
-
-    <!-- Día -->
-    <input
-    type="number"
-      v-if="filterDate.dia"
-      v-model="selectedDay"
-      placeholder="Día"
-      min="1"
-      max="31"
-      class="custom-input"
-    />
-    <p v-if="dayError" class="error-message">El número máximo para día es 31.</p>
-    
+          <!-- Día -->
+          <input
+            type="number"
+            v-if="filterDate.dia"
+            v-model="selectedDay"
+            placeholder="Día"
+            min="1"
+            max="31"
+            class="custom-input"
+          />
+          <p v-if="dayError" class="error-message">El número máximo para día es 31.</p>
         </div>
 
         <div class="filtro">
@@ -70,11 +67,14 @@
           </select>
         </div>
 
+        <!-- Elimina "Cancelado" del filtrado -->
         <div class="filtro">
           <label>Agrupar por:</label>
           <select v-model="selectedStatus" class="custom-select">
             <option value="">Todos los estados</option>
-            <option v-for="estado in estados" :key="estado">{{ estado }}</option>
+            <option v-for="estado in estados.filter((e) => e !== 'Cancelado')" :key="estado">
+              {{ estado }}
+            </option>
           </select>
         </div>
       </div>
@@ -95,6 +95,7 @@
               <th>Categoría</th>
               <th>Estado</th>
               <th>Descripción</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -105,6 +106,11 @@
               <td>{{ actividad.categoria }}</td>
               <td>{{ actividad.estado }}</td>
               <td>{{ actividad.descripcion }}</td>
+              <td>
+                <button class="btn-cancelar" @click="cancelarActividad(actividad.id)">
+                  Cancelar
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -123,10 +129,8 @@
 <script>
 import Navbar from '@/components/Navbar.vue'
 import lottie from 'lottie-web'
-
-
+import Swal from 'sweetalert2'
 import axios from 'axios'
-
 
 export default {
   name: 'HistorialActividades',
@@ -140,75 +144,44 @@ export default {
       selectedStatus: '',
       selectedYear: new Date().getFullYear(),
       selectedMonth: '',
-    selectedDay: '',
+      selectedDay: '',
 
-      filterDate: { dia: false, mes: false, año: false},
-      mascotas: [
-       // { id: 1, nombre: 'Coco' },
-        //{ id: 2, nombre: 'Lulu' }
-      ],
+      filterDate: { dia: false, mes: false, año: false },
+      mascotas: [],
       categorias: ['Vacunas', 'Paseo', 'Comida', 'Otra actividad'],
       estados: ['Completado', 'Pendiente', 'Cancelado'],
-      actividades: [
-        /*
-        {
-          id: 1,
-          mascota: 'Coco',
-          fecha: '26/06/2024',
-          categoria: 'Vacunas',
-          estado: 'Completado',
-          descripcion: 'octavalente.pdf'
-        },
-        {
-          id: 2,
-          mascota: 'Lulu',
-          fecha: '22/09/2024',
-          categoria: 'Paseo',
-          estado: 'Completado',
-          descripcion: 'parque'
-        }/*/ 
-      ]
+      actividades: []
     }
   },
   computed: {
-
     monthError() {
-      return  this.selectedMonth > 12;
+      return this.selectedMonth > 12
     },
     dayError() {
-      return  this.selectedDay > 31;
+      return this.selectedDay > 31
     },
     filteredActivities() {
-
       return this.actividades.filter((actividad) => {
         const matchPet = this.selectedPet === '' || actividad.mascota === this.selectedPet
         const matchCategory =
           this.selectedCategory === '' || actividad.categoria === this.selectedCategory
-        const matchStatus = this.selectedStatus === '' || actividad.estado === this.selectedStatus
+        const matchStatus =
+          this.selectedStatus === '' ||
+          actividad.estado.toLowerCase() === this.selectedStatus.toLowerCase()
         const matchYear = !this.filterDate.año || actividad.fecha.includes(this.selectedYear)
-        const matchMonth = !this.filterDate.mes || actividad.fecha.slice(3, 5) === String(this.selectedMonth).padStart(2, '0')
-      
-      // Verifica si el día coincide (filtra por día)
-      const matchDay = !this.filterDate.dia || actividad.fecha.slice(0, 2) === String(this.selectedDay).padStart(2, '0')
+        const matchMonth =
+          !this.filterDate.mes ||
+          actividad.fecha.slice(3, 5) === String(this.selectedMonth).padStart(2, '0')
+        const matchDay =
+          !this.filterDate.dia ||
+          actividad.fecha.slice(0, 2) === String(this.selectedDay).padStart(2, '0')
 
-        
-
-      
-
-       // return matchPet && matchCategory && matchStatus && matchYear
-      
-       return matchPet && matchCategory && matchStatus && matchYear && matchMonth && matchDay;
- 
+        return matchPet && matchCategory && matchStatus && matchYear && matchMonth && matchDay
       })
-
-      
     }
   },
 
-
-
-
-methods: {
+  methods: {
     formatearFecha(fechaISO) {
       const fecha = new Date(fechaISO)
       const dia = String(fecha.getDate()).padStart(2, '0')
@@ -219,41 +192,87 @@ methods: {
     transformarDatos(datosBackend) {
       return datosBackend.map((actividad) => ({
         id: actividad.id_actividad,
-        mascota: actividad.mascota,
-        fecha: this.formatearFecha(actividad.fecha_hora), // Convierte la fecha
-        categoria: actividad.tipo_actividad, // Renombrado de "tipo_actividad"
-        estado: 'Completado', // Valor fijo (puedes cambiarlo si hay más datos de estado)
-        descripcion: actividad.descripcion // Renombrado directamente
+        mascota: actividad.mascota || 'Desconocida',
+        fecha: this.formatearFecha(actividad.fecha_hora),
+        categoria: actividad.tipo_actividad || 'Sin categoría',
+        estado: actividad.estado, // Ahora siempre se recibe desde el backend
+        descripcion: actividad.descripcion || 'Sin descripción'
       }))
     },
+
     async cargarActividades() {
       try {
         const response = await axios.get('http://127.0.0.1:5000/actividad/lista')
+        console.log('Datos del backend:', response.data)
         this.actividades = this.transformarDatos(response.data)
 
-        
-
-         const nombresMascotas = [...new Set(response.data.map((actividad) => actividad.mascota))];
-    this.mascotas = nombresMascotas.map((nombre, index) => ({
-      id: index + 1, // Generar un ID temporal
-      nombre,
-    }));
+        const nombresMascotas = [...new Set(response.data.map((actividad) => actividad.mascota))]
+        this.mascotas = nombresMascotas.map((nombre, index) => ({
+          id: index + 1,
+          nombre
+        }))
       } catch (error) {
         console.error('Error al cargar actividades:', error)
+      }
+    },
+
+    async cancelarActividad(id) {
+      const confirm = await Swal.fire({
+        title: 'Confirmar cancelación',
+        text: 'Esta acción no se puede deshacer. ¿Estás seguro?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cancelar',
+        cancelButtonText: 'No, mantener',
+        buttonsStyling: true,
+        customClass: {
+          confirmButton: 'btn-confirmar',
+          cancelButton: 'btn-cancelar'
+        }
+      })
+
+      if (!confirm.isConfirmed) return
+
+      try {
+        const response = await axios.post('http://127.0.0.1:5000/actividad/cancelar', { id })
+        if (response.status === 200) {
+          await Swal.fire({
+            title: 'Cancelado',
+            text: 'La actividad ha sido cancelada exitosamente.',
+            icon: 'success',
+            confirmButtonText: 'Aceptar',
+            customClass: {
+              confirmButton: 'btn-confirmar'
+            }
+          })
+          this.cargarActividades()
+        } else {
+          await Swal.fire({
+            title: 'Error',
+            text: 'No se pudo cancelar la actividad.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+            customClass: {
+              confirmButton: 'btn-confirmar'
+            }
+          })
+        }
+      } catch (error) {
+        console.error('Error al cancelar la actividad:', error)
+        await Swal.fire({
+          title: 'Error',
+          text: 'Ocurrió un error al cancelar la actividad.',
+          icon: 'error',
+          confirmButtonText: 'Aceptar',
+          customClass: {
+            confirmButton: 'btn-confirmar'
+          }
+        })
       }
     }
   },
 
-
-
-
-
-///************************** */
-
-
-
   mounted() {
-    // Cargar animación de Lottie
     this.lottieInstance = lottie.loadAnimation({
       container: this.$refs.lottieAnimation,
       renderer: 'svg',
@@ -262,9 +281,7 @@ methods: {
       path: 'https://lottie.host/7c60a5bf-6152-43db-9d80-3bed207422ad/gSKGD7G5V4.json'
     })
 
-    //**
     this.cargarActividades()
-    //*/
   }
 }
 </script>
@@ -404,6 +421,26 @@ tr:hover {
   background-color: #f1f1f1;
 }
 
+/* Botón de cancelar */
+.btn-cancelar {
+  background-color: #f28b82 !important;
+  color: white !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+}
+
+.btn-cancelar:hover {
+  background-color: #d9534f;
+}
+
+/* Botón de confirmar en SweetAlert */
+.btn-confirmar {
+  background-color: #9d8189 !important;
+  color: white !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+}
+
 /* Footer */
 .footer {
   background-color: #9d8189;
@@ -415,5 +452,33 @@ tr:hover {
 
 .footer-content {
   font-size: 14px;
+}
+
+/* Botón de confirmar en SweetAlert */
+.swal2-confirm.btn-confirmar {
+  background-color: #ffcad4 !important; /* Rosado */
+  color: #4e3b47 !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+  border: none !important;
+  font-weight: bold;
+}
+
+.swal2-confirm.btn-confirmar:hover {
+  background-color: #f28b82 !important; /* Un tono más oscuro de rosado */
+}
+
+/* Botón de cancelar en SweetAlert */
+.swal2-cancel.btn-cancelar {
+  background-color: #bde0fe !important; /* Celeste */
+  color: #4e3b47 !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+  border: none !important;
+  font-weight: bold;
+}
+
+.swal2-cancel.btn-cancelar:hover {
+  background-color: #80bffe !important; /* Un tono más oscuro de celeste */
 }
 </style>

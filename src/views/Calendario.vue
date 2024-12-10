@@ -73,7 +73,7 @@ export default {
       try {
         const response = await axios.get('http://127.0.0.1:5000/actividad/actividades_calendario')
 
-        // Asegúrate de mantener el formato de fecha y hora correctamente
+        // Asegúrate de que las actividades canceladas ya no estén incluidas
         const eventos = response.data.map((evento) => ({
           ...evento,
           date: new Date(evento.date).toISOString() // ISO format with time
