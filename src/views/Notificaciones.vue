@@ -23,13 +23,13 @@
           <!-- Filtro por fecha de inicio -->
           <div class="filtro fecha">
             <label>Fecha inicio:</label>
-            <input type="date" v-model="selectedStartDate" class="custom-input" />
+            <input type="date" v-model="selectedStartDate" class="custom-input"  @change="cargarNotificaciones"/>
           </div>
   
           <!-- Filtro por fecha de fin -->
           <div class="filtro fecha">
             <label>Fecha fin:</label>
-            <input type="date" v-model="selectedEndDate" class="custom-input" />
+            <input type="date" v-model="selectedEndDate" class="custom-input" @change="cargarNotificaciones"/>
           </div>
         </div>
   
@@ -42,12 +42,15 @@
           >
             <h3>{{ notificacion.mensaje }}</h3>
             <p><strong>Fecha inicio:</strong> {{ formatearFecha(notificacion.fecha_inicio) }}</p>
-            <p><strong>Fecha fin:</strong> {{ formatearFecha(notificacion.fecha_fin) }}</p>
-            <p><strong>Se repite cada:</strong> {{ notificacion.frecuencia }}</p>
-            <button class="edit-btn" @click="openEditPopup(notificacion)">
-            Editar Notificación
-          </button>
+            <p v-if="!isRepetitive(notificacion)"><strong>Estado:</strong> {{ notificacion.estado }}</p>
+            <div v-else>
+              <p><strong>Fecha fin:</strong> {{ formatearFecha(notificacion.fecha_fin) }}</p>
+              <p><strong>Intervalo:</strong> {{ notificacion.intervalo }} {{ notificacion.unidad_intervalo }}</p>
+              <p><strong>Estado:</strong> {{ notificacion.estado }}</p>
+            </div>
+            <button class="edit-btn" @click="openEditPopup(notificacion)">Editar Notificación</button>
           </div>
+
         </div>
       </div>
 
@@ -82,67 +85,78 @@
 
     },
     data() {
-      return {
-        selectedStatus: '',
-        selectedStartDate: '',
-        selectedEndDate: '',
-        estados: ['Activa', 'Inactiva', 'Pendiente'], // Estados posibles
-        notificaciones: [
-            //ejemplo
-            {
-          id: 1,
-          mensaje: 'Vacunación programada',
-          estado: 'Activa',
-          fecha_inicio: '2024-12-01T08:00',
-          fecha_fin: '2024-12-10T18:00',
-          frecuencia: '1 día',
-          unidad: 'días',
-        },
-        {
-          id: 2,
-          mensaje: 'Control médico periódico',
-          estado: 'Pendiente',
-          fecha_inicio: '2024-11-25T09:00',
-          fecha_fin: '2024-12-05T17:00',
-          frecuencia: '2 días',
-          unidad: 'días',
-        },
-        ], // Datos de notificaciones
-        selectedNotification: null, // Notificación seleccionada para editar
-      }
+  return {
+    selectedStatus: '',
+    selectedStartDate: '',
+    selectedEndDate: '',
+    estados: ['Activo', 'Enviado'], // Estados posibles
+    notificaciones: [], // Inicialmente vacío, se llenará con datos del backend
+    selectedNotification: null // Notificación seleccionada para editar
+  };
+},
 
-    },
-    computed: {
-      // Filtra las notificaciones según los filtros seleccionados
-      filteredNotifications() {
-        return this.notificaciones.filter((notificacion) => {
-          const matchStatus =
-            this.selectedStatus === '' || notificacion.estado === this.selectedStatus
-          const matchStartDate =
-            !this.selectedStartDate || new Date(notificacion.fecha_inicio) >= new Date(this.selectedStartDate)
-          const matchEndDate =
-            !this.selectedEndDate || new Date(notificacion.fecha_fin) <= new Date(this.selectedEndDate)
+computed: {
+  filteredNotifications() {
+    return this.notificaciones.filter((notificacion) => {
+      // Filtrar por estado
+      const matchStatus =
+        this.selectedStatus === '' || notificacion.estado === this.selectedStatus;
+
+      // Filtrar por rango de fechas
+      const startDate = this.selectedStartDate ? new Date(this.selectedStartDate) : null;
+      const endDate = this.selectedEndDate ? new Date(this.selectedEndDate) : null;
+
+      const isInRange =
+        (!startDate || new Date(notificacion.fecha_inicio) >= startDate) &&
+        (!endDate || new Date(notificacion.fecha_fin) <= endDate);
+
+      // Retornar las notificaciones que coinciden con ambos filtros
+      return matchStatus && isInRange;
+    });
+  }
+},
   
-          return matchStatus && matchStartDate && matchEndDate
-        })
-      }
-    },
-    methods: {
-      formatearFecha(fechaISO) {
-        const fecha = new Date(fechaISO)
-        const dia = String(fecha.getDate()).padStart(2, '0')
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0')
-        const año = fecha.getFullYear()
-        return `${dia}/${mes}/${año}`
+methods: {
+    formatearFecha(fechaISO) {
+    const fecha = new Date(fechaISO);
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const año = fecha.getFullYear();
+    const horas = String(fecha.getHours()).padStart(2, '0');
+    const minutos = String(fecha.getMinutes()).padStart(2, '0');
+    return `${dia}/${mes}/${año} ${horas}:${minutos}`;
+  },
+
+      isRepetitive(notificacion) {
+        return notificacion.intervalo && notificacion.fecha_fin;
       },
+    
       async cargarNotificaciones() {
-        try {
-          const response = await axios.get('http://127.0.0.1:5000/notificaciones')
-          this.notificaciones = response.data
-        } catch (error) {
-          console.error('Error al cargar notificaciones:', error)
-        }
-      },
+  if (this.selectedStartDate && this.selectedEndDate) {
+    if (new Date(this.selectedStartDate) > new Date(this.selectedEndDate)) {
+      alert('La fecha de inicio no puede ser mayor que la fecha de fin.');
+      return;
+    }
+  }
+
+  try {
+    const params = {};
+
+    if (this.selectedStartDate) {
+      params.fecha_inicio = this.selectedStartDate;
+    }
+    if (this.selectedEndDate) {
+      params.fecha_fin = this.selectedEndDate;
+    }
+
+    const response = await axios.get('http://127.0.0.1:5000/notificacion/notificaciones', { params });
+    this.notificaciones = response.data;
+  } catch (error) {
+    console.error('Error al cargar notificaciones:', error);
+    alert('No se pudieron cargar las notificaciones.');
+  }
+},
+
       openEditPopup(notificacion) {
       this.selectedNotification = { ...notificacion } // Clonar la notificación seleccionada
     },
@@ -163,6 +177,8 @@
     },
     mounted() {
       this.cargarNotificaciones()
+      console.log(this.notificaciones); // Verifica que se actualice con datos reales.
+
     }
   }
   </script>
